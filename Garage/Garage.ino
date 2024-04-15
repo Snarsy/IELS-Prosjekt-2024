@@ -9,7 +9,7 @@ Zumo32U4IMU imu;
 #include "TurnSensor.h"
 
 int gps = 0;
-
+int plass;
 
 const int followLinemaxSpeed = 200;
 int lastError = 0;
@@ -39,22 +39,23 @@ void setup(){
 void loop(){
   switch (gps){
     case 0:
-      motors.setSpeeds(0,0);
-      if(buttonA.isPressed()){
-        delay(500);
-        gps = 1;
-      }
-      break;
-
-    case 1:
       driveLinePID();
       readSensors();
       if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4)){
         motors.setSpeeds(100,100);
         delay(300);
         motors.setSpeeds(0,0);
-        gps = 2;
         delay(500);
+        gps = 1;
+      }
+      break;
+
+    case 1:
+      motors.setSpeeds(0,0);
+      if(buttonA.isPressed()){
+        delay(500);
+        gps = 2;
+        plass = 2;
       }
       break;
 
@@ -65,8 +66,13 @@ void loop(){
         motors.setSpeeds(100,100);
         delay(300);
         motors.setSpeeds(0,0);
-        turndeg(87);
-        gps = 0;
+        if(plass == 0){
+          gps = 0;
+          turndeg(87);
+        }
+        else{
+          plass--;
+        }
       }
       break;
   }
