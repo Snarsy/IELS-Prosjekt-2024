@@ -9,10 +9,7 @@ Zumo32U4IMU imu;
 #include "InterScript.h"
 #include "TurnSensor.h"
 
-
-unsigned long prevmillis = 0;
-bool inGarage = 0;
-bool onRoad = 0;
+int gps = 0;
 
 
 const int followLinemaxSpeed = 200;
@@ -33,6 +30,7 @@ void driveLinePID()
     motors.setSpeeds(leftSpeed, rightSpeed);
 }
 
+
 void setup(){
   lineSensors.initFiveSensors();
   Serial.begin(115200);
@@ -41,33 +39,37 @@ void setup(){
 }
 
 void loop(){
-  if(buttonA.isPressed()){
-    delay(500);
-    onRoad = 1;
-  }
-  if(onRoad == 1){
-    driveLinePID();
-  }
-  readSensors();
-  if (inGarage == 0){
-    if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4) && onRoad == 1){
-    motors.setSpeeds(100,100);
-    delay(300);
-    motors.setSpeeds(0,0);
-    onRoad = 0;
-    inGarage = 1;
-    delay(500);
-    motors.setSpeeds(100,100);
-    }
-  }
-  else if (inGarage == 1){
-    if(aboveLine(3) && aboveLine(4) && aboveLine(0)!=1 && aboveLine(1)!=1){
-      motors.setSpeeds(100,100);
-      delay(300);
+  switch (gps){
+    case 0:
       motors.setSpeeds(0,0);
-      onRoad = 0;
-      turndeg(87);
-      inGarage = 0;
-    }
+      if(buttonA.isPressed()){
+        delay(500);
+        gps = 1;
+      }
+      break;
+
+    case 1:
+      driveLinePID();
+      readSensors();
+      if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4)){
+        motors.setSpeeds(100,100);
+        delay(300);
+        motors.setSpeeds(0,0);
+        gps = 2;
+        delay(500);
+      }
+      break;
+
+    case 2:
+      motors.setSpeeds(100,100);
+      readSensors();
+      if(aboveLine(3) && aboveLine(4) && aboveLine(0)!=1 && aboveLine(1)!=1){
+        motors.setSpeeds(100,100);
+        delay(300);
+        motors.setSpeeds(0,0);
+        turndeg(87);
+        gps = 0;
+      }
+      break;
   }
 }

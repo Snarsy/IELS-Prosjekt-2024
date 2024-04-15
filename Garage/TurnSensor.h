@@ -104,8 +104,6 @@ void turnSensorSetup()
   // Turn on the yellow LED in case the display is not available.
   ledYellow(1);
 
-  // Delay to give the user time to remove their finger.
-  delay(500);
 
   // Calibrate the gyro.
   int32_t total = 0;
@@ -125,7 +123,7 @@ void turnSensorSetup()
   // user presses A.
   display.clear();
   turnSensorReset();
-  while (millis()<8000)
+  while (millis()<7000)
   {
     motors.setSpeeds(100,-100);
     turnSensorUpdate();
