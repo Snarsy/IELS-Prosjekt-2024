@@ -101,10 +101,6 @@ void turnSensorSetup()
   display.clear();
   display.print(F("Gyro cal"));
 
-  // Turn on the yellow LED in case the display is not available.
-  ledYellow(1);
-
-
   // Calibrate the gyro.
   int32_t total = 0;
   for (uint16_t i = 0; i < 1024; i++)
