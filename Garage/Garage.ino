@@ -6,7 +6,6 @@ Zumo32U4Motors motors;
 Zumo32U4LineSensors lineSensors;
 Zumo32U4IMU imu;
 
-#include "InterScript.h"
 #include "TurnSensor.h"
 
 int gps = 0;
