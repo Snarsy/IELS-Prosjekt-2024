@@ -34,7 +34,6 @@ void setup(){
   lineSensors.initFiveSensors();
   Serial.begin(115200);
   turnSensorSetup();
-  turnSensorReset();
 }
 
 void loop(){
