@@ -1,4 +1,4 @@
-
+#include <Wire.h>
 
 //Ledpins
 const int ledPin_1 = 13;
@@ -6,17 +6,23 @@ const int ledPin_2 = 12;
 const int ledPin_3 = 11;
 const int ledPin_4 = 10;
 
+int ledPinArray[4] = {ledPin_1, ledPin_2, ledPin_3, ledPin_4};
+
 //Sendepins til distansemåler
 const int trigPin_1 = 2;
 const int trigPin_2 = 4;
 const int trigPin_3 = 6;
 const int trigPin_4 = 8;
 
+int trigPinArray[4] = {trigPin_1, trigPin_2, trigPin_3, trigPin_4};
+
 //Mottakerpins til distansemåler
 const int echoPin_1 = 3;
 const int echoPin_2 = 5;
 const int echoPin_3 = 7;
 const int echoPin_4 = 9;
+
+int echoPinArray[4] = {echoPin_1, echoPin_2, echoPin_3, echoPin_4};
 
 //Distansemåling variabler
 float distance_spot1, distance_spot2, distance_spot3, distance_spot4;
@@ -25,20 +31,13 @@ float prevDistance_spot1, prevDistance_spot2, prevDistance_spot3, prevDistance_s
 int parkingDistanceArray[4] = {distance_spot1, distance_spot2, distance_spot3, distance_spot4};
 int previousParkingDistanceArray[4] = {prevDistance_spot1, prevDistance_spot2, prevDistance_spot3, prevDistance_spot4};
 
+int parkingDistanceTreshold = 4; //Hvor lav målingen skal være for at noe skal være parkert
+const float speedOfSound = 0.0343;
 
 //Parkeringsstatusvariabler
 bool parkingspace1_status, parkingspace2_status, parkingspace3_status, parkingspace4_status = false;
 
-int ledPinArray[4] = {ledPin_1, ledPin_2, ledPin_3, ledPin_4};
-int trigPinArray[4] = {trigPin_1, trigPin_2, trigPin_3, trigPin_4};
-int echoPinArray[4] = {echoPin_1, echoPin_2, echoPin_3, echoPin_4};
-
-
 bool parkingStatusArray[4] = {parkingspace1_status, parkingspace2_status, parkingspace3_status, parkingspace4_status};
-
-float speedOfSound = 0.0343;
-
-int parkingDistanceTreshold = 4;
 
 
 void fysiskSjekk_parkering(){
@@ -70,29 +69,29 @@ void fysiskSjekk_parkering(){
         }
 
         previousParkingDistanceArray[i] = parkingDistanceArray[i];
-            
-
-        //Testing
-        Serial.print("Tid: ");
-        Serial.println(duration);
-        Serial.print("Distanse: ");
-        Serial.println(parkingDistanceArray[i]);
-        delay(100);
     }
 }
 
 void updateParkingStatus(int Parkingspace){
 
-    if(parkingStatusArray[Parkingspace] == true){
+    if(parkingStatusArray[Parkingspace] == true){ //Ingenting på parkeringsplass
         digitalWrite(ledPinArray[Parkingspace], HIGH);
 
         //Oppdater nettside, send til ESP32...
+        Wire.beginTransmission(2);
+        Wire.write(Parkingspace);
+        Wire.write(parkingStatusArray[Parkingspace]);
+        Wire.endTransmission();
     }
 
-    if(parkingStatusArray[Parkingspace] == false){
+    if(parkingStatusArray[Parkingspace] == false){ //Noe på parkeringsplass
         digitalWrite(ledPinArray[Parkingspace], LOW);
 
         //Oppdater nettside, send til ESP32...
+        Wire.beginTransmission(2);
+        Wire.write(Parkingspace);
+        Wire.write(parkingStatusArray[Parkingspace]);
+        Wire.endTransmission();
     }
 }
 
@@ -114,6 +113,8 @@ void setup(){
     pinMode(echoPin_3, INPUT);
     pinMode(echoPin_4, INPUT);
 
+    //Kommunikasjon med ESP32
+    Wire.begin();
     
 }
 
