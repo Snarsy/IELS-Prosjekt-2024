@@ -8,10 +8,16 @@ Zumo32U4IMU imu;
 
 #include "TurnSensor.h"
 
-int whadido = 3;
+int whereTo = 3;
 int gps = 0;
-int box = 0;
-const int followLinemaxSpeed = 200;
+int caseNum = 0;
+int caseNumGarage = 0;
+bool go = 0;
+bool elbil = true;
+int ledigplass = 2;
+int currentplass = 0;
+
+int followLinemaxSpeed = 200;
 int lastError = 0;
 int direction = 1;
 unsigned long prevmillis = 0;
@@ -38,33 +44,85 @@ void setup(){
     turnSensorSetup();
 }
 void loop(){
-    switch(box){
-        case 0:
+    switch(caseNum){
+        case 0://Hovedcase. Her kjører bilen med linjefølger og stopper når den når ønskede mål. Ellers kjører den over kryss i case 1.
+        followLinemaxSpeed = 200;
             driveLinePID();
-            if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4) && direction == 1 && (gps+1) == whadido){
-                box = 2;
+            if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4) && direction == 1 && (gps+1) == whereTo){
+                caseNum = 2;
                 motors.setSpeeds(100,100);
                 prevmillis = millis();
             }
             else if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4) && direction == 1){
                 gps = gps+1;
-                box = 1;
+                caseNum = 1;
                 prevmillis = millis();
             }
         break;
 
-        case 1:
+        case 1://Bilen kjører rett fram over krysset.
             motors.setSpeeds(100,100);
             if(millis()-prevmillis>200){
-                box = 0;
+                caseNum = 0;
+            }
+        break;
+        case 2://Bilen stopper etter den har kjørt litt fremmover.
+            if(millis()-prevmillis>250){
+                motors.setSpeeds(0,0);
+                turndeg(87);
+                motors.setSpeeds(100,100);
+                prevmillis = millis();
+                if(whereTo == 3){//Utifra valgt plass(whereTo) så bytter den til neste case.
+                    caseNum = 3;
+                }
+                else if(whereTo == 2){
+                    caseNum = 4;
+                }
             }
         break;
 
-        case 2:
-            if(millis()-prevmillis>200){
-                motors.setSpeeds(0,0);
+
+        case 3://Garasje case.
+            switch (caseNumGarage){
+                case 0:
+                    if(millis()-prevmillis>600){
+                        motors.setSpeeds(0,0);
+                    }
+                    if(buttonA.isPressed()){
+                        caseNumGarage = 1;
+                    }
+                break;
+                case 1:
+                    followLinemaxSpeed = 150;
+                    readSensors();
+                    if(aboveLine(0) && aboveLine(1) && (currentplass) == ledigplass){
+                        caseNumGarage = 3;
+                        prevmillis = millis();
+                    }
+                    else if(aboveLine(0) && aboveLine(1)){
+                        currentplass = currentplass + 1;
+                        caseNumGarage = 2;
+                        prevmillis = millis();
+                    }
+                    driveLinePID();
+                break;
+                case 2:
+                    motors.setSpeeds(100,100);
+                    if(millis()-prevmillis>300){
+                        caseNumGarage = 1;
+                    }
+                break;
+                case 3:
+                    motors.setSpeeds(100,100);
+                    if(millis()-prevmillis>250){
+                        motors.setSpeeds(0,0);
+                        turndeg(-87);
+                        motors.setSpeeds(100,100);
+                        prevmillis = millis();
+                        caseNumGarage = 0;
+                    }
+                break;
             }
-            
         break;
     }
   }
