@@ -17,7 +17,7 @@ bool elbil = true;
 int ledigplass = 2;
 int currentplass = 0;
 
-const int followLinemaxSpeed = 200;
+int followLinemaxSpeed = 200;
 int lastError = 0;
 int direction = 1;
 unsigned long prevmillis = 0;
@@ -46,6 +46,7 @@ void setup(){
 void loop(){
     switch(caseNum){
         case 0://Hovedcase. Her kjører bilen med linjefølger og stopper når den når ønskede mål. Ellers kjører den over kryss i case 1.
+        followLinemaxSpeed = 200;
             driveLinePID();
             if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4) && direction == 1 && (gps+1) == whereTo){
                 caseNum = 2;
@@ -84,15 +85,41 @@ void loop(){
         case 3://Garasje case.
             switch (caseNumGarage){
                 case 0:
-                    if(aboveLine(0) && aboveLine(1) && !aboveLine(3) && !aboveLine(4) && (currentplass+1) == ledigplass){
-                        caseNumGarage = 2;
-                        motors.setSpeeds(100,100);
+                    if(millis()-prevmillis>600){
+                        motors.setSpeeds(0,0);
+                    }
+                    if(buttonA.isPressed()){
+                        caseNumGarage = 1;
+                    }
+                break;
+                case 1:
+                    followLinemaxSpeed = 150;
+                    readSensors();
+                    if(aboveLine(0) && aboveLine(1) && (currentplass) == ledigplass){
+                        caseNumGarage = 3;
                         prevmillis = millis();
                     }
-                    else if(aboveLine(0) && aboveLine(1) && !aboveLine(3) && !aboveLine(4)){
+                    else if(aboveLine(0) && aboveLine(1)){
                         currentplass = currentplass + 1;
-                        caseNumGarage = 1;
+                        caseNumGarage = 2;
                         prevmillis = millis();
+                    }
+                    driveLinePID();
+                break;
+                case 2:
+                    motors.setSpeeds(100,100);
+                    if(millis()-prevmillis>300){
+                        caseNumGarage = 1;
+                    }
+                break;
+                case 3:
+                    motors.setSpeeds(100,100);
+                    if(millis()-prevmillis>250){
+                        motors.setSpeeds(0,0);
+                        turndeg(-87);
+                        motors.setSpeeds(100,100);
+                        prevmillis = millis();
+                        caseNumGarage = 0;
                     }
                 break;
             }
