@@ -8,9 +8,14 @@ Zumo32U4IMU imu;
 
 #include "TurnSensor.h"
 
-int whadido = 3;
+int whereTo = 3;
 int gps = 0;
 int box = 0;
+bool go = 0;
+bool elbil = true;
+int ledigplass = 2;
+int currentplass = 0;
+
 const int followLinemaxSpeed = 200;
 int lastError = 0;
 int direction = 1;
@@ -39,9 +44,9 @@ void setup(){
 }
 void loop(){
     switch(box){
-        case 0:
+        case 0://Hovedcase. Her kjører bilen med linjefølger og stopper når den når ønskede mål. Ellers kjører den over kryss i case 1.
             driveLinePID();
-            if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4) && direction == 1 && (gps+1) == whadido){
+            if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4) && direction == 1 && (gps+1) == whereTo){
                 box = 2;
                 motors.setSpeeds(100,100);
                 prevmillis = millis();
@@ -53,17 +58,29 @@ void loop(){
             }
         break;
 
-        case 1:
+        case 1://Bilen kjører rett fram over krysset.
             motors.setSpeeds(100,100);
             if(millis()-prevmillis>200){
                 box = 0;
             }
         break;
 
-        case 2:
-            if(millis()-prevmillis>200){
+        case 2://Bilen stopper etter den har kjørt litt fremmover.
+            if(millis()-prevmillis>250){
                 motors.setSpeeds(0,0);
+                turndeg(87);
+                motors.setSpeeds(100,100);
+                prevmillis = millis();
+                if(whereTo == 3){//Utifra valgt plass(whereTo) så bytter den til neste case.
+                    box = 3;
+                }
+                else if(whereTo == 2){
+                    box = 4;
+                }
             }
+        break;
+
+        case 3://Garasje case.
             
         break;
     }
