@@ -21,9 +21,9 @@ Zumo32U4IMU imu;
 #define LEFT_IR 1
 
 const int IRPin = A4;
-// const int IRSenderPin = 5;
+
 IRrecv IR(IRPin);
-// IRsend irSender;
+
 
 int irGarageCase = 0;
 
