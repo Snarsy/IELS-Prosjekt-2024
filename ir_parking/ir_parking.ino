@@ -27,36 +27,15 @@ IRrecv IR(IRPin);
 
 int irGarageCase = 0;
 
-int gps = 0;
 
-const int followLinemaxSpeed = 200;
-int lastError = 0;
-void driveLinePID()
-{ //Linjefølging tatt fra Kevin Pololu. 
-    int16_t position = lineSensors.readLine(lineSensorValues); //Leser linjeesensor. 
-    int16_t error = position - 2000; //Finnet ut om det er venstre eller høyre som er mer utenfor linjen.
-    int16_t speedDifference = error / 1 + 4 * (error - lastError); 
-
-    lastError = error;
-
-    int leftSpeed = followLinemaxSpeed + speedDifference;
-    int rightSpeed = followLinemaxSpeed - speedDifference;
-    leftSpeed = constrain(leftSpeed, 0, (int16_t)followLinemaxSpeed); //Constrain for å ikke få minus, og ikke over 400 verdi. 
-    rightSpeed = constrain(rightSpeed, 0, (int16_t)followLinemaxSpeed);
-
-    motors.setSpeeds(leftSpeed, rightSpeed);
-}
 
 void setup()
 {
     Serial.begin(9600);
-    irSensors.stop();
     lineSensors.initFiveSensors();
     proxSensors.initFrontSensor();
     IR.begin(IRPin, ENABLE_LED_FEEDBACK);
-    // irSender.begin(IRSenderPin);
-    turnSensorSetup();
-    turnSensorReset();
+    
 }
 
 void irCase(){
@@ -65,22 +44,22 @@ void irCase(){
         irDecode();
         break;
     case 1:
-
+        //En
         break;
     case 2:
-
+        //To
         break;
     case 3:
-
+        //Tre
         break;
     case 4:
-
+        //Fire
         break;
     case 5:
 
         break;
     case 6:
-
+        //Ingen ledig plass
         break;
 
     }
@@ -90,51 +69,19 @@ void irDecode(){
     if (IR.decode())
     {
         Serial.println(IR.decodedIRData.decodedRawData);
-        if (IR.decodedIRData.decodedRawData == 2592268650) irGarageCase = 1;
-        if (IR.decodedIRData.decodedRawData == 556677) irGarageCase = 2;
-        if (IR.decodedIRData.decodedRawData == 334455 ) irGarageCase = 3;
-        if (IR.decodedIRData.decodedRawData == 112233 ) irGarageCase = 4;
-        if (IR.decodedIRData.decodedRawData == 778899 ) irGarageCase = 5;
+        if (IR.decodedIRData.decodedRawData == 2592268650) irGarageCase = 1; //Første verdi
+        if (IR.decodedIRData.decodedRawData == 510274632) irGarageCase = 2; //Andre verdi
+        if (IR.decodedIRData.decodedRawData == 1277849113 ) irGarageCase = 3; //Tredje verdi
+        if (IR.decodedIRData.decodedRawData == 2163717077 ) irGarageCase = 4; //Fjerde verdi
+        if (IR.decodedIRData.decodedRawData == 2227349217 ) irGarageCase = 5; //Femte verdi
         IR.resume();
     }
 }
 
-void garageSwitch(){
-    switch (gps){
-    case 0:
-      driveLinePID();
-      irDecode();
-      readSensors();
-      break;
 
-    case 1:
-      driveLinePID();
-      readSensors();
-      if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4)){
-        motors.setSpeeds(100,100);
-        delay(300);
-        motors.setSpeeds(0,0);
-        gps = 2;
-        delay(500);
-      }
-      break;
-
-    case 2:
-      motors.setSpeeds(100,100);
-      readSensors();
-      if(aboveLine(3) && aboveLine(4) && aboveLine(0)!=1 && aboveLine(1)!=1){
-        motors.setSpeeds(100,100);
-        delay(300);
-        motors.setSpeeds(0,0);
-        turndeg(87);
-        gps = 0;
-      }
-      break;
-  }
-}
 
 
 void loop()
 {
-   garageSwitch();
+   irCase();
 }
