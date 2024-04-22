@@ -3,9 +3,9 @@
 
 //Sendepins til distansemåler
 
-const int trigPin_1 = 6;
+const int trigPin_1 = 2;
 const int trigPin_2 = 4;
-const int trigPin_3 = 2;
+const int trigPin_3 = 6;
 const int trigPin_4 = 8;
 
 int trigPinArray[4] = {trigPin_1, trigPin_2, trigPin_3, trigPin_4};
@@ -13,9 +13,9 @@ int trigPinArray[4] = {trigPin_1, trigPin_2, trigPin_3, trigPin_4};
 
 //Mottakerpins til distansemåler
 
-const int echoPin_1 = 7;
+const int echoPin_1 = 3;
 const int echoPin_2 = 5;
-const int echoPin_3 = 3;
+const int echoPin_3 = 7;
 const int echoPin_4 = 9;
 
 int echoPinArray[4] = {echoPin_1, echoPin_2, echoPin_3, echoPin_4};
