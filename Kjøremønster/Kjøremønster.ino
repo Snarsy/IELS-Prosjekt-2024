@@ -10,7 +10,8 @@ Zumo32U4IMU imu;
 
 int whereTo = 3;
 int gps = 0;
-int box = 0;
+int caseNum = 0;
+int caseNumGarage = 0;
 bool go = 0;
 bool elbil = true;
 int ledigplass = 2;
@@ -43,17 +44,17 @@ void setup(){
     turnSensorSetup();
 }
 void loop(){
-    switch(box){
+    switch(caseNum){
         case 0://Hovedcase. Her kjører bilen med linjefølger og stopper når den når ønskede mål. Ellers kjører den over kryss i case 1.
             driveLinePID();
             if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4) && direction == 1 && (gps+1) == whereTo){
-                box = 2;
+                caseNum = 2;
                 motors.setSpeeds(100,100);
                 prevmillis = millis();
             }
             else if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4) && direction == 1){
                 gps = gps+1;
-                box = 1;
+                caseNum = 1;
                 prevmillis = millis();
             }
         break;
@@ -61,10 +62,9 @@ void loop(){
         case 1://Bilen kjører rett fram over krysset.
             motors.setSpeeds(100,100);
             if(millis()-prevmillis>200){
-                box = 0;
+                caseNum = 0;
             }
         break;
-
         case 2://Bilen stopper etter den har kjørt litt fremmover.
             if(millis()-prevmillis>250){
                 motors.setSpeeds(0,0);
@@ -72,16 +72,30 @@ void loop(){
                 motors.setSpeeds(100,100);
                 prevmillis = millis();
                 if(whereTo == 3){//Utifra valgt plass(whereTo) så bytter den til neste case.
-                    box = 3;
+                    caseNum = 3;
                 }
                 else if(whereTo == 2){
-                    box = 4;
+                    caseNum = 4;
                 }
             }
         break;
 
+
         case 3://Garasje case.
-            
+            switch (caseNumGarage){
+                case 0:
+                    if(aboveLine(0) && aboveLine(1) && !aboveLine(3) && !aboveLine(4) && (currentplass+1) == ledigplass){
+                        caseNumGarage = 2;
+                        motors.setSpeeds(100,100);
+                        prevmillis = millis();
+                    }
+                    else if(aboveLine(0) && aboveLine(1) && !aboveLine(3) && !aboveLine(4)){
+                        currentplass = currentplass + 1;
+                        caseNumGarage = 1;
+                        prevmillis = millis();
+                    }
+                break;
+            }
         break;
     }
   }
