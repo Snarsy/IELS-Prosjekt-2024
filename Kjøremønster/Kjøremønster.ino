@@ -16,6 +16,7 @@ bool go = 0;
 bool elbil = true;
 int ledigplass = 2;
 int currentplass = 0;
+int driveovertime = 600;
 
 int followLinemaxSpeed = 200;
 int lastError = 0;
@@ -85,7 +86,7 @@ void loop(){
         case 3://Garasje case.
             switch (caseNumGarage){
                 case 0:
-                    if(millis()-prevmillis>600){
+                    if(millis()-prevmillis>driveovertime){
                         motors.setSpeeds(0,0);
                     }
                     if(buttonA.isPressed()){
@@ -108,13 +109,13 @@ void loop(){
                 break;
                 case 2:
                     motors.setSpeeds(100,100);
-                    if(millis()-prevmillis>300){
+                    if(millis()-prevmillis>driveovertime){
                         caseNumGarage = 1;
                     }
                 break;
                 case 3:
                     motors.setSpeeds(100,100);
-                    if(millis()-prevmillis>250){
+                    if(millis()-prevmillis>driveovertime){
                         motors.setSpeeds(0,0);
                         turndeg(-87);
                         motors.setSpeeds(100,100);
