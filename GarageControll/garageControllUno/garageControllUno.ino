@@ -29,7 +29,7 @@ int prevDistance_spot1, prevDistance_spot2, prevDistance_spot3, prevDistance_spo
 int parkingDistanceArray[4] = {distance_spot1, distance_spot2, distance_spot3, distance_spot4};
 int previousParkingDistanceArray[4] = {prevDistance_spot1, prevDistance_spot2, prevDistance_spot3, prevDistance_spot4};
 
-int parkingDistanceTreshold = 4; //Hvor lav målingen skal være for at noe skal være parkert
+int parkingDistanceTreshold = 8; //Hvor lav målingen skal være for at noe skal være parkert
 const float speedOfSound = 0.0343;
 
 //Parkeringsstatusvariabler
@@ -50,7 +50,6 @@ void physicalCheck_parking(){
         digitalWrite(trigPinArray[i], HIGH);
         delayMicroseconds(10);
         digitalWrite(trigPinArray[i], LOW);
-
         duration = pulseIn(echoPinArray[i], HIGH);
         parkingDistanceArray[i] = (duration*speedOfSound)/2.0; //Måler tiden det tar og deler på to fordi lyden går frem og tilbake
 
@@ -68,6 +67,10 @@ void physicalCheck_parking(){
             updateParkingStatus(i);
         }
 
+            Serial.print("Sensor ");
+            Serial.print(i+1);
+            Serial.print(": ");
+            Serial.println(parkingStatusArray[i]);
         previousParkingDistanceArray[i] = parkingDistanceArray[i];
     }
 }
@@ -98,8 +101,12 @@ void setup(){
     //Kommunikasjon med ESP32
     Wire.begin();
     
+
+    
 }
 
 void loop(){
     physicalCheck_parking();
+
+    
 }

@@ -3,31 +3,40 @@
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 #include <ArduinoJson.hpp>
-
-
-//MQTT-variabler
-
-const char* ssid = "";
-const char* password = "";
-const char* MQTT_UN = "";
-const char* MQTT_PW = "";
-const char* mqtt_server = "";
-
-//I2C-variabler
-
-volatile int parkingSpace = -1;
-volatile int availability = -1;
-
-// LED-pins
-
-const int ledPin_1 = 12;
-const int ledPin_2 = 15;
-const int ledPin_3 = 26;
-const int ledPin_4 = 27;
+#include <EEPROM.h>
 
 
 WiFiClient espClient;
 PubSubClient client(espClient);
+
+
+//MQTT-variabler
+
+const char* ssid = "NTNU-IOT";
+const char* password = "";
+const char* MQTT_UN = "fosfix";
+const char* MQTT_PW = "C4nn3ds0up3s321";
+const char* mqtt_server = "10.25.18.161";
+
+
+//Parkingvariabler
+
+volatile int parkingSpace, availability = -1;
+
+int numberOfSpotsAdress = 1;
+int numberOfSpots = EEPROM.read(numberOfSpotsAdress);
+
+long lastMsg = 0;
+
+
+// LED-pins
+
+const int ledPin_1 = 12;
+const int ledPin_2 = 14;
+const int ledPin_3 = 26;
+const int ledPin_4 = 27;
+
+int ledPinArray[4] = {ledPin_1, ledPin_2, ledPin_3, ledPin_4};
 
 
 // MQTT & WiFi setup
@@ -53,7 +62,6 @@ void setup_wifi() {
 
 
 void reconnect() {
-
     while (!client.connected()) {
         Serial.print("Attempting MQTT connection...");
 
@@ -78,36 +86,28 @@ void reconnect() {
 
 
 void receiveEvent(int howMany){
-    
-    if (howMany >= 2){
-        parkingSpace = Wire.read();
-        availability = Wire.read();
-    }
-    
-    /*
-    int parkingSpace;
     while(1 < Wire.available())
     {
-        int parkingSpace = Wire.read();
-        Serial.print(parkingSpace);
+        parkingSpace = Wire.read();
     }
-    int availability = Wire.read();
+    if(Wire.available())
+    {
+        availability = Wire.read();
+    }
+    Serial.print("parkingSpace: ");
+    Serial.println(parkingSpace);
+    Serial.print("Availability: ");
     Serial.println(availability);
+}
 
-    
 
-    //Lager et JSON-dokument som skal inneholde data
-    StaticJsonDocument<80> doc;
-    char output[80];
-
-    //Legger til variabler til JSON-dokumentet
-    doc["s"] = parkingSpace;
-    doc["a"] = availability;
-
-    SerializeJson(doc, output); //Gjør om verdiene til noe som kan sendes
-    Serial.println(output);
-    client.publish("garage/esp32", output); //Sender dokumentet til MQTT
-    */
+void updateNumberOfSpots(){
+    numberOfSpots = 0;
+    for(int i = 0; i < 4; i++){
+        if(digitalRead(ledPinArray[i]) == HIGH){
+            numberOfSpots += 1;
+        }
+    }
 }
 
 
@@ -118,25 +118,29 @@ void availabilityLEDs(){
     switch (parkingSpace)
     {
     case 0:
-        digitalWrite(ledPin_1, availability);
+        digitalWrite(ledPin_1, !availability);
         break;
 
     case 1:
-        digitalWrite(ledPin_2, availability);
+        digitalWrite(ledPin_2, !availability);
         break;
 
     case 2:
-        digitalWrite(ledPin_3, availability);
+        digitalWrite(ledPin_3, !availability);
         break;
 
     case 3:
-        digitalWrite(ledPin_4, availability);
+        digitalWrite(ledPin_4, !availability);
         break;
     
     default:
         break;
     }
 }
+
+
+//MAIN
+
 
 void setup(){
     Serial.begin(9600);
@@ -153,33 +157,32 @@ void setup(){
     client.setServer(mqtt_server, 1883);
 }
 
+
 void loop(){ 
     delay(100);
 
     if (!client.connected()) {
-    reconnect();
-  }
-  client.loop();
-
-  if (parkingSpace != -1 && availability != -1) {
-
-    //Endrer "tilgjengelighetslys"
+        reconnect();
+    }
+    updateNumberOfSpots();
+    client.loop();
     availabilityLEDs();
+    
+    long now = millis();
+        if(now - lastMsg > 5000){
+        lastMsg = now;
 
-    //Lager et JSON-dokument som skal inneholde data
-    StaticJsonDocument<80> doc;
-    char output[80];
+        //Endrer "tilgjengelighetslys"
 
-    //Legger til variabler til JSON-dokumentet
-    doc["s"] = parkingSpace;
-    doc["a"] = availability;
+        //Lager et JSON-dokument som skal inneholde data
+        StaticJsonDocument<80> doc;
+        char output[80];
 
-    serializeJson(doc, output); //Gjør om verdiene til noe som kan sendes
-    Serial.println(output);
-    client.publish("garage/esp32", output); //Sender dokumentet til MQTT
+        //Legger til variabler til JSON-dokumentet
+        doc["n"] = numberOfSpots;
 
-    //Resetter variabler
-    parkingSpace = -1;
-    availability = -1;
-  }
+        serializeJson(doc, output); //Gjør om verdiene til noe som kan sendes
+        Serial.println(output);
+        client.publish("garage/esp32", output); //Sender dokumentet til MQTT
+        }
 }
