@@ -21,10 +21,10 @@ bool elbil = true;
 int ledigplass = 10;
 int currentplass = 0;
 int driveovertime = 600;
-
+int right = 1;
 int followLinemaxSpeed = 200;
 int lastError = 0;
-int direction = 1;
+int directionCircle = right;
 unsigned long prevmillis = 0;
 
 #define PRINT_DEGUB_INFO 0 // Set to 1 to enable debug info
@@ -64,7 +64,7 @@ void irDecode(){
         if (IR.decodedIRData.decodedRawData == 2592268650)  ledigplass = 0; //Første verdi
         if (IR.decodedIRData.decodedRawData == 510274632)   ledigplass = 1; //Andre verdi
         if (IR.decodedIRData.decodedRawData == 1277849113 ) ledigplass = 2; //Tredje verdi
-        if (IR.decodedIRData.decodedRawData == 2163717077 ) ledigplass = 3; //FXjerde verdi
+        if (IR.decodedIRData.decodedRawData == 2163717077 ) ledigplass = 3; //Fjerde verdi
         if (IR.decodedIRData.decodedRawData == 2227349217 ) ledigplass = 4; //Femte verdi
         IR.resume();
     }
@@ -83,12 +83,12 @@ void loop(){
         case 0://Hovedcase. Her kjører bilen med linjefølger og stopper når den når ønskede mål. Ellers kjører den over kryss i case 1.
           followLinemaxSpeed = 200;
           driveLinePID();
-          if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4) && direction == 1 && (gps+1) == whereTo){
+          if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4) && directionCircle == right && (gps+1) == whereTo){
               caseNum = 2;
               motors.setSpeeds(100,100);
               prevmillis = millis();
           }
-          else if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4) && direction == 1){
+          else if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4) && directionCircle == right){
               gps = gps+1;
               caseNum = 1;
               prevmillis = millis();
