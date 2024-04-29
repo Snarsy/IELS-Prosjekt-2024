@@ -13,6 +13,7 @@ IRsend ir;
 
 const int spaceNumber = 4;
 
+
 // MQTT-variabler
 
 const char* ssid = "NTNU-IOT";
@@ -34,6 +35,7 @@ int availabilityArray[spaceNumber] = {availability_spot1, availability_spot2, av
 long lastMsg = 0;
 
 bool noSpotsAvailable = false;
+
 
 // LED-pins
 
@@ -58,6 +60,7 @@ const int hexForIR_noParking = 0x87654321;
 int hexForIR_Array[spaceNumber] = {hexForIR_parkingSpace1 ,hexForIR_parkingSpace2, hexForIR_parkingSpace3 ,hexForIR_parkingSpace4};
 
 long lastSentIR = 0;
+
 
 // MQTT & WiFi setup
 
@@ -99,6 +102,25 @@ void reconnect() {
             delay(5000);
         }
     }   
+}
+
+
+void sendParkInfo(){
+    long now = millis();
+    if(now - lastMsg > 5000){
+        lastMsg = now;
+
+        //Lager et JSON-dokument som skal inneholde data
+        StaticJsonDocument<80> doc;
+        char output[80];
+
+        //Legger til variabler til JSON-dokumentet
+        doc["n"] = EEPROM.read(numberOfSpotsAdress);
+
+        serializeJson(doc, output); //Gjør om verdiene til noe som kan sendes
+        Serial.println(output);
+        client.publish("garage/esp32", output); //Sender dokumentet til MQTT
+    }
 }
 
 
@@ -186,7 +208,8 @@ void IR_for_parking(){
             ir.sendNEC(hexForIR_noParking, 32);
         }
 
-        else{ //Ellers send ut en av plassene
+        //Ellers send ut en av plassene
+        else{
             for(int i = 0; i < spaceNumber; i++){
                 if(availabilityArray[i] == 1){
                     ir.sendNEC(hexForIR_Array[i], 32); 
@@ -195,6 +218,7 @@ void IR_for_parking(){
         }
     }
 }
+
 
 //MAIN
 
@@ -228,20 +252,5 @@ void loop(){
     availabilityLEDs();
     updateNumberOfSpots();
     IR_for_parking();
-    
-    long now = millis();
-    if(now - lastMsg > 5000){
-        lastMsg = now;
-
-        //Lager et JSON-dokument som skal inneholde data
-        StaticJsonDocument<80> doc;
-        char output[80];
-
-        //Legger til variabler til JSON-dokumentet
-        doc["n"] = EEPROM.read(numberOfSpotsAdress);
-
-        serializeJson(doc, output); //Gjør om verdiene til noe som kan sendes
-        Serial.println(output);
-        client.publish("garage/esp32", output); //Sender dokumentet til MQTT
-    }
+    sendParkInfo();
 }
