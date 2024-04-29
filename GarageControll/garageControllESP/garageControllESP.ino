@@ -4,13 +4,16 @@
 #include <ArduinoJson.h>
 #include <ArduinoJson.hpp>
 #include <EEPROM.h>
+#include <IRremote.h>
 
 
 WiFiClient espClient;
 PubSubClient client(espClient);
+IRsend ir;
 
+const int spaceNumber = 4;
 
-//MQTT-variabler
+// MQTT-variabler
 
 const char* ssid = "NTNU-IOT";
 const char* password = "";
@@ -19,15 +22,18 @@ const char* MQTT_PW = "C4nn3ds0up3s321";
 const char* mqtt_server = "10.25.18.161";
 
 
-//Parkingvariabler
+// Parkingvariabler
 
 volatile int parkingSpace, availability = -1;
 
 int numberOfSpotsAdress = 1;
-int numberOfSpots = EEPROM.read(numberOfSpotsAdress);
+int previousNumberOfSpots = EEPROM.read(numberOfSpotsAdress);
+int availability_spot1 , availability_spot2, availability_spot3, availability_spot4 = 0;
+int availabilityArray[spaceNumber] = {availability_spot1, availability_spot2, availability_spot3, availability_spot4};
 
 long lastMsg = 0;
 
+bool noSpotsAvailable = false;
 
 // LED-pins
 
@@ -36,8 +42,22 @@ const int ledPin_2 = 14;
 const int ledPin_3 = 26;
 const int ledPin_4 = 27;
 
-int ledPinArray[4] = {ledPin_1, ledPin_2, ledPin_3, ledPin_4};
+int ledPinArray[spaceNumber] = {ledPin_1, ledPin_2, ledPin_3, ledPin_4};
 
+
+// IR-variabler
+
+const int IRPIN = 35;
+const int IR_delay = 3000;
+const int hexForIR_parkingSpace1 = 0x56874159;
+const int hexForIR_parkingSpace2 = 0x12345678;
+const int hexForIR_parkingSpace3 = 0x98765432;
+const int hexForIR_parkingSpace4 = 0xABCDEF01;
+const int hexForIR_noParking = 0x87654321;
+
+int hexForIR_Array[spaceNumber] = {hexForIR_parkingSpace1 ,hexForIR_parkingSpace2, hexForIR_parkingSpace3 ,hexForIR_parkingSpace4};
+
+long lastSentIR = 0;
 
 // MQTT & WiFi setup
 
@@ -102,11 +122,26 @@ void receiveEvent(int howMany){
 
 
 void updateNumberOfSpots(){
-    numberOfSpots = 0;
-    for(int i = 0; i < 4; i++){
+    //Bruker parkeringslysene for å telle antall ledige plasser
+    int numberOfSpots = 0;
+    for(int i = 0; i < spaceNumber; i++){
+
         if(digitalRead(ledPinArray[i]) == HIGH){
             numberOfSpots += 1;
+            noSpotsAvailable = false;
         }
+        
+        availabilityArray[i] == digitalRead(ledPinArray[i]);
+    }
+
+    //Dersom antall ledige plasser endres, skriv ut til eeprom
+    if(numberOfSpots != previousNumberOfSpots){
+        EEPROM.write(numberOfSpotsAdress,numberOfSpots);
+    }
+
+    //Dersom det ikke er noen ledige plasser
+    if(numberOfSpots == 0){
+        noSpotsAvailable = true;
     }
 }
 
@@ -139,6 +174,28 @@ void availabilityLEDs(){
 }
 
 
+//IR
+
+void IR_for_parking(){
+    long now = millis();
+    if(now - lastSentIR > IR_delay){
+        lastSentIR = now;
+
+        //Dersom ingen ledige plasser, si ifra til bil
+        if(noSpotsAvailable){
+            ir.sendNEC(hexForIR_noParking, 32);
+        }
+
+        else{ //Ellers send ut en av plassene
+            for(int i = 0; i < spaceNumber; i++){
+                if(availabilityArray[i] == 1){
+                    ir.sendNEC(hexForIR_Array[i], 32); 
+                }
+            }
+        }
+    }
+}
+
 //MAIN
 
 
@@ -155,6 +212,8 @@ void setup(){
 
     setup_wifi();
     client.setServer(mqtt_server, 1883);
+
+    ir.begin(IRPIN);
 }
 
 
@@ -164,25 +223,25 @@ void loop(){
     if (!client.connected()) {
         reconnect();
     }
-    updateNumberOfSpots();
     client.loop();
+
     availabilityLEDs();
+    updateNumberOfSpots();
+    IR_for_parking();
     
     long now = millis();
-        if(now - lastMsg > 5000){
+    if(now - lastMsg > 5000){
         lastMsg = now;
-
-        //Endrer "tilgjengelighetslys"
 
         //Lager et JSON-dokument som skal inneholde data
         StaticJsonDocument<80> doc;
         char output[80];
 
         //Legger til variabler til JSON-dokumentet
-        doc["n"] = numberOfSpots;
+        doc["n"] = EEPROM.read(numberOfSpotsAdress);
 
         serializeJson(doc, output); //Gjør om verdiene til noe som kan sendes
         Serial.println(output);
         client.publish("garage/esp32", output); //Sender dokumentet til MQTT
-        }
+    }
 }
