@@ -20,8 +20,16 @@ void setup() {
 void loop() {
   //read a gesture from the device
     uint8_t gesture = apds.readGesture();
-    if(gesture == APDS9960_DOWN) Serial.println("v");
-    if(gesture == APDS9960_UP) Serial.println("^");
-    if(gesture == APDS9960_LEFT) Serial.println("<");
-    if(gesture == APDS9960_RIGHT) Serial.println(">");
+    if(gesture == APDS9960_DOWN){
+        Serial.println("Price going down");
+    }
+    if(gesture == APDS9960_UP){
+        Serial.println("Price going up");
+    } 
+    if(gesture == APDS9960_LEFT){
+        Serial.println("Cancel transaction - left");
+    } 
+    if(gesture == APDS9960_RIGHT){
+        Serial.println("Buy transaction - right");
+    } 
 }
