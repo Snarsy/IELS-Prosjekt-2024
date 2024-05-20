@@ -3,7 +3,7 @@
 Zumo32U4OLED display;
 Zumo32U4Buzzer buzzer;
 Zumo32U4ButtonA buttonA;
-Zumo32U4ButtonB buttonB;
+Zumo32U4ButtonC buttonC;
 Zumo32U4Motors motors;
 Zumo32U4LineSensors lineSensors;
 Zumo32U4ProximitySensors proxSensors;
@@ -29,7 +29,8 @@ int prevcase;
 int driveOverNum = 0;
 int prevmillis = 0;
 int caseNum = 1;
-void driveOverLine(int line){
+int linelength = 200;
+void driveOverLine(){
     switch (driveOverNum){
         case 0:
             prevmillis = millis();
@@ -37,7 +38,7 @@ void driveOverLine(int line){
             break;
         case 1:
             motors.setSpeeds(100,100);
-            if(millis()-prevmillis>line){
+            if(millis()-prevmillis>linelength){
                 caseNum = prevcase;
                 driveOverNum = 0;
                 motors.setSpeeds(0,0);
@@ -48,6 +49,8 @@ void driveOverLine(int line){
 
 int parkingAvailable = 0;//Har nummeret 10 fram til bilen får ledig plass.
 void irDecode(){
+    if(buttonC.isPressed()) parkingAvailable = 1; //Er til slik at det er mulig å teste garasjen uten diode. Fjerne ved endelig versjon.
+    
     if (IR.decode())
     {
         Serial.println(IR.decodedIRData.decodedRawData);
@@ -60,41 +63,86 @@ void irDecode(){
     }
 }
 
+int destination = 1;
+int currentPosition = 3;
+bool clockWise = 0;
+
 int caseNumGarage = 0;
 int currentPosGarage = 0;
 void garage(){
-    followLinemaxSpeed = 150;
+    followLinemaxSpeed = 200;
     switch (caseNumGarage){
-        case 0:
-            if(millis()-prevmillis<500){
-                turndeg(90);
+        case 0://Denne casen får zumo'n til å kjøre over linjen for så å rotere utifra hvilken retning den kommer fra(clockwise). Deretter kjører den frem, stopper og venter på ir signal.
+            if(millis()-prevmillis<50){//Her må det være mindre enn samme verdi som 81.
+                if(clockWise) turndeg(90);
+                if(!clockWise) turndeg(-90);
+                prevcase = caseNum;
+                caseNum = 0;
+                linelength = 50;// Lengden bilen kjører over må være samme tall som i linje 76. Dette er slik at den ikke kjører lengre enn den skal.
+                break;
+            }
+            motors.setSpeeds(0,0);
+            linelength = 400;//Hvor mange millisekunder zumo'n skal kjøre over en linje
+            irDecode();
+            if(parkingAvailable != 0){
+                caseNumGarage = 1;
+            }
+            break;
+        case 1:// Her er det en rekke tilfeller. Sjekker om bilen er ved linje hvor den vil kjøre over. Deretter kjører den inn eller over krysset.
+            driveLinePID();
+            if(aboveAll() && currentPosGarage == (parkingAvailable+1)){//Hvis den treffer et kryss og er på riktig plass i garasjen vil den snu 180 grader og bytte til case 2 hvor den står i ro.
+                prevmillis = millis();
+                if(parkingAvailable == 1){// Hvis den ikke får parkere ved at det ikke er plass vil den kjøre over linjen og bytte til case 3.
+                    caseNumGarage = 3;
+                    prevcase = caseNum;
+                    caseNum = 0;
+                    break;
+                }
+                turndeg(175);
+                caseNumGarage = 2;
+                break;
+            }
+            if(aboveLeft()){//Denne skjer førrst ved at uansett hvilket kryss det er så vil zumo'n kjøre over ved hjelp av case 0 i switch(caseNum).
+                currentPosGarage = currentPosGarage + 1;
                 prevcase = caseNum;
                 caseNum = 0;
                 break;
             }
-            motors.setSpeeds(0,0);
-            irDecode();
-            if(parkingAvailable !=0){
-                caseNumGarage = 1;
-            }
-            break;
-        case 1:
-            driveLinePID();
-            if(aboveAll()){
-                turndeg(180);
-                caseNumGarage = 2;
-            }
-            if(aboveLeft() && currentPosGarage == parkingAvailable){
-                turndeg(90);
-            }
-            if(aboveLeft()){
-                prevcase = caseNum;
-                caseNum = 0;
+            if(currentPosGarage == parkingAvailable){//Hvis den er på riktig plass vil zumo'n rotere inn for så å kjøre videre med pid kjøring.
+                turndeg(-90);
                 currentPosGarage = currentPosGarage + 1;
+                break;
+            }
+            if(currentPosGarage == 9){//Denne kommer i bruk når bilen kjører ut. Dette skjer etter case 2.
+                turndeg(90);
+                caseNum = 1;
+                currentPosition = 2;
             }
             break;
         case 2:
-            motors.setSpeeds(0,0);
+            if(millis()-prevmillis<3000 && currentPosGarage == (parkingAvailable+1)){
+                motors.setSpeeds(0,0);
+            }
+            else{
+                driveLinePID();
+                if(aboveAll()){
+                    prevcase = caseNum;
+                    caseNum = 0;
+                    currentPosGarage = currentPosGarage + 1;
+                    break;
+                }
+                if(currentPosGarage == (parkingAvailable+2)){
+                    caseNumGarage = 1;
+                    turndeg(-90);
+                }
+            }
+            break;
+        case 3:
+            if((millis()-prevmillis)<(linelength+100)){
+                turndeg(-90);
+                caseNumGarage = 1;
+                currentPosGarage = 8;
+            }
             break;
     }
 }
@@ -106,16 +154,19 @@ void setup(){
     turnSensorSetup();
 }
 
-int destination = 1;
-int currentPosition = 0;
-bool clockWise = 1;
 void loop(){
     switch (caseNum){           //Hovedcase for bilkjøringen. Kan evt legges inn i en void hvis dette ser bedre ut.
         case 0:                 //driveoverline vil kjøre over en linje og returnere til det den gjorde før. Dette gjør at man kan kjøre over kryss og fortsette videre i koden. Husk prevcase = casenum før man setter casenum = 0.
-            driveOverLine(300);
+            driveOverLine();
             break;
         case 1:                 //Generellt kjørecase. Vil kjøre over linjene til den treffer ønsket posisjon
             driveLinePID();
+            if(currentPosition>destination && clockWise == 1){//Denne gjør at bilen vil endre rettning for å komme seg raskeere til ønsket posisjon.
+                clockWise = 0;
+                turnSensorReset();
+                turndeg(175);
+                break;
+            }
             if(aboveAll()){     //Treffer bilen et kryss vil den stoppe og kjøre over for så å oppdatere plasseringen.
                 prevcase = caseNum;
                 caseNum = 0;

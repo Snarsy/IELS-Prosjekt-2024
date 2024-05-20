@@ -119,7 +119,7 @@ void turnSensorSetup()
   // user presses A.
   display.clear();
   turnSensorReset();
-  while (millis()<6200)
+  while (millis()<5500)
   {
     motors.setSpeeds(100,-100);
     turnSensorUpdate();
