@@ -46,42 +46,55 @@ void driveOverLine(int line){
     }
 }
 
-int parkingAvailable = 11;//Har nummeret 10 fram til bilen får ledig plass.
+int parkingAvailable = 0;//Har nummeret 10 fram til bilen får ledig plass.
 void irDecode(){
     if (IR.decode())
     {
         Serial.println(IR.decodedIRData.decodedRawData);
-        if (IR.decodedIRData.decodedRawData == 2592268650)  parkingAvailable = 0; //Første verdi
-        if (IR.decodedIRData.decodedRawData == 510274632)   parkingAvailable = 1; //Andre verdi
-        if (IR.decodedIRData.decodedRawData == 1277849113 ) parkingAvailable = 2; //Tredje verdi
-        if (IR.decodedIRData.decodedRawData == 2163717077 ) parkingAvailable = 3; //Fjerde verdi
-        if (IR.decodedIRData.decodedRawData == 2227349217 ) parkingAvailable = 4; //Femte verdi
+        if (IR.decodedIRData.decodedRawData == 2592268650)  parkingAvailable = 1; //Første verdi
+        if (IR.decodedIRData.decodedRawData == 510274632)   parkingAvailable = 2; //Andre verdi
+        if (IR.decodedIRData.decodedRawData == 1277849113 ) parkingAvailable = 3; //Tredje verdi
+        if (IR.decodedIRData.decodedRawData == 2163717077 ) parkingAvailable = 4; //Fjerde verdi
+        if (IR.decodedIRData.decodedRawData == 2227349217 ) parkingAvailable = 5; //Femte verdi
         IR.resume();
     }
 }
 
-int caseNumGarage = 1;
+int caseNumGarage = 0;
 int currentPosGarage = 0;
 void garage(){
     followLinemaxSpeed = 150;
     switch (caseNumGarage){
         case 0:
-            driveOverLine(500);
+            if(millis()-prevmillis<500){
+                turndeg(90);
+                prevcase = caseNum;
+                caseNum = 0;
+                break;
+            }
+            motors.setSpeeds(0,0);
+            irDecode();
+            if(parkingAvailable !=0){
+                caseNumGarage = 1;
+            }
             break;
         case 1:
-            irDecode();
-            if(parkingAvailable!=10){
-              caseNumGarage = 2;
-            }
-        break;
-        case 2:
             driveLinePID();
-            if(aboveLeft()){
-                if(parkingAvailable == 0){
-                    turndeg(-90);
-                    caseNum = 1;
-                }
+            if(aboveAll()){
+                turndeg(180);
+                caseNumGarage = 2;
             }
+            if(aboveLeft() && currentPosGarage == parkingAvailable){
+                turndeg(90);
+            }
+            if(aboveLeft()){
+                prevcase = caseNum;
+                caseNum = 0;
+                currentPosGarage = currentPosGarage + 1;
+            }
+            break;
+        case 2:
+            motors.setSpeeds(0,0);
             break;
     }
 }
@@ -93,32 +106,36 @@ void setup(){
     turnSensorSetup();
 }
 
-int destination = 3;
+int destination = 1;
 int currentPosition = 0;
+bool clockWise = 1;
 void loop(){
-    switch (caseNum){
-        case 0:
+    switch (caseNum){           //Hovedcase for bilkjøringen. Kan evt legges inn i en void hvis dette ser bedre ut.
+        case 0:                 //driveoverline vil kjøre over en linje og returnere til det den gjorde før. Dette gjør at man kan kjøre over kryss og fortsette videre i koden. Husk prevcase = casenum før man setter casenum = 0.
             driveOverLine(300);
             break;
-        case 1:
+        case 1:                 //Generellt kjørecase. Vil kjøre over linjene til den treffer ønsket posisjon
             driveLinePID();
-            if(aboveAll()){
+            if(aboveAll()){     //Treffer bilen et kryss vil den stoppe og kjøre over for så å oppdatere plasseringen.
                 prevcase = caseNum;
                 caseNum = 0;
-                currentPosition = currentPosition + 1;
+                if(clockWise == 1){
+                    currentPosition = currentPosition + 1;
+                }
+                else{
+                    currentPosition = currentPosition - 1;
+                }
                 break;
             }
-            if(currentPosition == destination){
-                turndeg(90);
+            if(currentPosition == destination){//Hvis bilen er på riktig plass vil den rotere 90 grader og bytte til kjøremønsteret for destinasjonen.
                 prevmillis = millis();
-                caseNum = destination;
-                currentPosition = currentPosition + 1;
+                if(destination == 1){//I dette tilfellet er destination = 3, garasjen.
+                    caseNum = 2;
                 }
+            }
             break;
-        case 3:
+        case 2:
             garage();
             break;
     }
-    display.clear();
-    display.print(caseNum);
 }
