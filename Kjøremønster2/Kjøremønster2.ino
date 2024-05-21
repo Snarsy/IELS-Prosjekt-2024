@@ -137,9 +137,6 @@ void garage(){
                 }
             }
             break;
-        case 3:
-            motors.setSpeeds(0,0);
-            break;
     }
 }
 
