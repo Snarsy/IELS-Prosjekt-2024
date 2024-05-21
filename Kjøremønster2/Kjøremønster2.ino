@@ -64,8 +64,8 @@ void irDecode(){
 }
 
 int destination = 2;
-int currentPosition = 3;
-bool clockWise = 0;
+int currentPosition = 0;
+bool clockWise = 1;
 
 int caseNumGarage = 0;
 int currentPosGarage = 0;
