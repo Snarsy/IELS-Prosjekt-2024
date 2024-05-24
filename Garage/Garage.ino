@@ -86,7 +86,7 @@ void garage(){
             readSensors();
             if(aboveLine(0) && aboveLine(1) && (currentplass) == ledigplass){//Hvis den er på riktig plass vil den rotere 90 grader 
               if(ledigplass == 0){//Er den på første plass så vil den rotere og kjøre ut. Den vil bytte til linjefølger og gå tilbake til hovedcase.
-                turndeg(-87);
+                turndeg(-90);
                 caseNum = 0;
                 caseNumGarage = 0;
                 break;
@@ -111,7 +111,7 @@ void garage(){
             motors.setSpeeds(100,100);
             if(millis()-prevmillis>400){
                 motors.setSpeeds(0,0);
-                turndeg(-87);
+                turndeg(-90);
                 motors.setSpeeds(100,100);
                 prevmillis = millis();
                 caseNumGarage = 4;
@@ -120,7 +120,7 @@ void garage(){
         case 4:
         readSensors();
         if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4)){
-            turndeg(176);
+            turndeg(180);
             prevmillis = millis();
             caseNumGarage = 5;
         }
@@ -138,7 +138,7 @@ void garage(){
         break;
         case 6:
             if(millis()-prevmillis>300){
-                turndeg(-87);
+                turndeg(-90);
                 caseNumGarage = 7;
             }
         break;
@@ -197,7 +197,7 @@ void loop(){
         case 2://Bilen stopper etter den har kjørt litt fremmover.
             if(millis()-prevmillis>250){
                 motors.setSpeeds(0,0);
-                turndeg(87);
+                turndeg(90);
                 motors.setSpeeds(100,100);
                 prevmillis = millis();
                 if(whereTo == 3){//Utifra valgt plass(whereTo) så bytter den til neste case.
