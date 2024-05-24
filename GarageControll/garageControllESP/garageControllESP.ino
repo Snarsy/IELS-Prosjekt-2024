@@ -198,6 +198,7 @@ void availabilityLEDs(){
 
 //IR
 
+
 void IR_for_parking(){
     long now = millis();
     if(now - lastSentIR > IR_delay){
