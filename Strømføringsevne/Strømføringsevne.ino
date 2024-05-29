@@ -6,6 +6,7 @@
 #include <ArduinoJson.hpp>
 
 BME280 mySensor;
+WiFiClient espClient;
 PubSubClient client(espClient);
 
 //Temperatur-variabler
@@ -74,7 +75,7 @@ void sendTempInfo(){
         char output[80];
 
         //Legger til variabler til JSON-dokumentet
-        doc["t1"] = EEPROM.read(temperature);
+        doc["t1"] = temperature;
 
         serializeJson(doc, output); //Gjør om verdiene til noe som kan sendes
         Serial.println(output);
@@ -97,7 +98,7 @@ void setup(){
 }
 
 void loop(){
-    temperature = round(mySensor.readTempF(),2);
+    temperature = mySensor.readTempF();
     
     sendTempInfo();
 }

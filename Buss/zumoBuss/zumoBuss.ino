@@ -108,12 +108,14 @@ void driveLineStandardLowSpeed(){
 }
 
 void receiveByte(){
-    if (RxByte == '2'){ //Slow speed
+    if (RxByte == 2){ //Slow speed
         speedCaseInt = 1;
+        Serial.println("huh");
     }
-    else if (RxByte == '1') //High speed
+    else if (RxByte == 1) //High speed
     {
         speedCaseInt = 0;
+        Serial.println("high sped");
     }
     
 }
