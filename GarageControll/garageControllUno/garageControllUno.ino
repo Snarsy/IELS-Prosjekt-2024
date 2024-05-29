@@ -100,13 +100,8 @@ void setup(){
 
     //Kommunikasjon med ESP32
     Wire.begin();
-    
-
-    
 }
 
 void loop(){
     physicalCheck_parking();
-
-    
 }
