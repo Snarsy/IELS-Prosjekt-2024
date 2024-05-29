@@ -63,9 +63,9 @@ void irDecode(){
     }
 }
 
-int destination = 1;
-int currentPosition = 3;
-bool clockWise = 0;
+int destination = 2;
+int currentPosition = 0;
+bool clockWise = 1;
 
 int caseNumGarage = 0;
 int currentPosGarage = 0;
@@ -137,14 +137,11 @@ void garage(){
                 }
             }
             break;
-        case 3:
-            if((millis()-prevmillis)<(linelength+100)){
-                turndeg(-90);
-                caseNumGarage = 1;
-                currentPosGarage = 8;
-            }
-            break;
     }
+}
+
+void yx(){
+    motors.setSpeeds(0,0);
 }
 
 void setup(){
@@ -183,10 +180,16 @@ void loop(){
                 if(destination == 1){//I dette tilfellet er destination = 3, garasjen.
                     caseNum = 2;
                 }
+                else if(destination == 2){
+                    caseNum = 3;
+                }
             }
             break;
         case 2:
             garage();
+            break;
+        case 3:
+            yx();
             break;
     }
 }

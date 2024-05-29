@@ -20,7 +20,7 @@ const char* ssid = "NTNU-IOT";
 const char* password = "";
 const char* MQTT_UN = "fosfix";
 const char* MQTT_PW = "C4nn3ds0up3s321";
-const char* mqtt_server = "10.25.18.161";
+const char* mqtt_server = "10.25.18.134";
 
 
 // Parkingvariabler
@@ -197,6 +197,7 @@ void availabilityLEDs(){
 
 
 //IR
+
 
 void IR_for_parking(){
     long now = millis();
