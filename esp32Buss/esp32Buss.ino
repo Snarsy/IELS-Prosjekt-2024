@@ -1,6 +1,7 @@
 #include <PubSubClient.h>
 #include <WiFi.h>
 #include <ArduinoJson.h>
+#include <Wire.h>
 
 const char *ssid = "NTNU-IOT";
 const char *pass = "";
@@ -10,6 +11,7 @@ const char *MQTT_PW = "C4nn3ds0up3s321";
 
 long lastMsg = 0;
 
+int weatherInt;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -42,27 +44,53 @@ void setup()
 
 void callback(String topic, byte *message, unsigned int length)
 {
-  Serial.print("Message arrived on topic: ");
-  Serial.print(topic);
-  Serial.print(". Message: ");
+  //Serial.print("Message arrived on topic: ");
+  //Serial.print(topic);
+  //Serial.print(". Message: ");
   String messageTemp;
 
   for (int i = 0; i < length; i++)
   {
-    Serial.print((char)message[i]);
+    //Serial.print((char)message[i]);
     messageTemp += (char)message[i];
   }
   Serial.println();
 
   if (topic == "trondheim/temperature")
   {
-    Serial.print("Temperature: ");
-    Serial.println(messageTemp);
+    /*Serial.print("Temperature: ");
+    Serial.println(messageTemp);*/
+    float temperature = messageTemp.toFloat();
+
+    if (temperature < 4.00){
+        weatherInt = 2; //Slow speed verdi på zumoBuss kode
+        Wire.beginTransmission(0x55); // Transmit to device with address 85 (0x55)
+        Wire.write((weatherInt));      // Sends Potentiometer Reading (8Bit)
+        Wire.endTransmission();       // Stop transmitting
+    } 
+    else {
+        weatherInt = 1; //High speed verdi på ZumoBuss kode
+        Wire.beginTransmission(0x55); // Transmit to device with address 85 (0x55)
+        Wire.write((weatherInt));      // Sends Potentiometer Reading (8Bit)
+        Wire.endTransmission();       // Stop transmitting
+        Serial.println("High speed");
+        Serial.println(weatherInt);
+    }
   }
   else if (topic == "trondheim/wind")
   {
-    Serial.print("Wind: ");
-    Serial.println(messageTemp);
+    /*Serial.print("Wind: ");
+    Serial.println(messageTemp);*/
+
+    float windSpeed = messageTemp.toFloat();
+
+    if (windSpeed > 26.00){
+        Serial.println("Go inside, its windy");
+        weatherInt = 3; //Full stopp verdi på ZumoBuss kode
+        Wire.beginTransmission(0x55); // Transmit to device with address 85 (0x55)
+        Wire.write((weatherInt));      // Sends Potentiometer Reading (8Bit)
+        Wire.endTransmission();       // Stop transmitting
+    }
   }
   /*else if (topic == "trondheim/description")
   {
