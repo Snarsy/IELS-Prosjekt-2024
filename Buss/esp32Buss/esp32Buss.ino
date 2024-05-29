@@ -45,9 +45,6 @@ void setup()
 
 void callback(String topic, byte *message, unsigned int length)
 {
-  //Serial.print("Message arrived on topic: ");
-  //Serial.print(topic);
-  //Serial.print(". Message: ");
   String messageTemp;
 
   for (int i = 0; i < length; i++)
@@ -59,8 +56,6 @@ void callback(String topic, byte *message, unsigned int length)
 
   if (topic == "trondheim/temperature")
   {
-    /*Serial.print("Temperature: ");
-    Serial.println(messageTemp);*/
     float temperature = messageTemp.toFloat();
 
     if (temperature < 4.00){
@@ -80,9 +75,6 @@ void callback(String topic, byte *message, unsigned int length)
   }
   else if (topic == "trondheim/wind")
   {
-    /*Serial.print("Wind: ");
-    Serial.println(messageTemp);*/
-
     float windSpeed = messageTemp.toFloat();
 
     if (windSpeed > 26.00){
@@ -118,13 +110,8 @@ void loop()
   {
     lastMsg = now;
 
-    // int on = 1;
-
-    // Legger til verdier i JSON-dokument
-    // doc["p"] = on;
-
     // Gjør om JSON til seriell
-    serializeJson(doc, output);
+    serializeJson(doc, output); 
     // Serial.println(output);
     client.publish("trondheim/weather", output);
   }

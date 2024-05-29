@@ -110,12 +110,10 @@ void driveLineStandardLowSpeed(){
 void receiveByte(){
     if (RxByte == 2){ //Slow speed
         speedCaseInt = 1;
-        Serial.println("huh");
     }
     else if (RxByte == 1) //High speed
     {
         speedCaseInt = 0;
-        Serial.println("high sped");
     }
     
 }
@@ -128,13 +126,11 @@ void speedCase(){
     switch (speedCaseInt)
     {
     case 0:
-            //driveLineStandardHighSpeed();
-            motors.setSpeeds(200,200);
+            driveLineStandardHighSpeed();
         break;
     
     case 1:
-            //driveLineStandardLowSpeed();
-            motors.setSpeeds(-200,-200);
+            driveLineStandardLowSpeed();
         break;
     
     case 2:
