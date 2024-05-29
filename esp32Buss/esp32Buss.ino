@@ -36,6 +36,7 @@ void setup_wifi()
 void setup()
 {
   Serial.begin(9600);
+  Wire.begin();
   setup_wifi();
   // MQTT-client detaljer
   client.setServer(mqtt_server, 1883);
@@ -65,13 +66,13 @@ void callback(String topic, byte *message, unsigned int length)
     if (temperature < 4.00){
         weatherInt = 2; //Slow speed verdi på zumoBuss kode
         Wire.beginTransmission(0x55); // Transmit to device with address 85 (0x55)
-        Wire.write((weatherInt));      // Sends Potentiometer Reading (8Bit)
+        Wire.write((weatherInt));      // Send int
         Wire.endTransmission();       // Stop transmitting
     } 
     else {
         weatherInt = 1; //High speed verdi på ZumoBuss kode
         Wire.beginTransmission(0x55); // Transmit to device with address 85 (0x55)
-        Wire.write((weatherInt));      // Sends Potentiometer Reading (8Bit)
+        Wire.write((weatherInt));      // Send int
         Wire.endTransmission();       // Stop transmitting
         Serial.println("High speed");
         Serial.println(weatherInt);
@@ -88,7 +89,7 @@ void callback(String topic, byte *message, unsigned int length)
         Serial.println("Go inside, its windy");
         weatherInt = 3; //Full stopp verdi på ZumoBuss kode
         Wire.beginTransmission(0x55); // Transmit to device with address 85 (0x55)
-        Wire.write((weatherInt));      // Sends Potentiometer Reading (8Bit)
+        Wire.write((weatherInt));      // Sends int
         Wire.endTransmission();       // Stop transmitting
     }
   }
