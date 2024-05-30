@@ -279,3 +279,7 @@ void loop(){
             break;
     }
 }
+
+void tollGate(){ //Tar imot bompengepriser
+
+}

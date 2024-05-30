@@ -2,7 +2,7 @@
 
 IRsend ir;
 
-const int IRPIN = 19;
+const int IRPIN = 2;
 const int hexForBom = 0x45678912;
 const int IR_delay = 100;
 
