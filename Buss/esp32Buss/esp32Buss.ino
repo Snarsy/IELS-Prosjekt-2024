@@ -69,8 +69,6 @@ void callback(String topic, byte *message, unsigned int length)
         Wire.beginTransmission(0x55); // Transmit to device with address 85 (0x55)
         Wire.write((weatherInt));      // Send int
         Wire.endTransmission();       // Stop transmitting
-        Serial.println("High speed");
-        Serial.println(weatherInt);
     }
   }
   else if (topic == "trondheim/wind")
@@ -85,12 +83,6 @@ void callback(String topic, byte *message, unsigned int length)
         Wire.endTransmission();       // Stop transmitting
     }
   }
-  /*else if (topic == "trondheim/description")
-  {
-    Serial.print("Description: ");
-    Serial.println(messageTemp);
-  }*/
-  Serial.println();
 }
 void loop()
 {
