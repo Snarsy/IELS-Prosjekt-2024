@@ -295,3 +295,7 @@ void setup(){
 void loop(){
     driving();
 }
+
+void tollGate(){ //Tar imot bompengepriser
+
+}
