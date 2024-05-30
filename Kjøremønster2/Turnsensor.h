@@ -135,11 +135,9 @@ int vinkel;
 bool sjekk1=0;
 bool sjekk2=0;
 bool drive = 1;
-void turndeg(int tilverdi)//Denne funksjonen roterer bilen i 90 grader ved hjelp av gyroen. Den har 87 grader ettersom dette er hva 90 grader er lik på skolens gulv.
-//Derimot med mer friksjon så vil man bruke 90 grader istedenfor 87 for 90.
-//Denne er blokkerende, men det er grunnet at dette er en rotasjon og tilnærmet null batteriliv skal gå ned av dette.
-{ // 87 grader er lik 90
-  // Snur den 90 grader. 
+void turndeg(int tilverdi){//Denne funksjonen roterer bilen i 90 grader ved hjelp av gyroen. Den har 87 grader ettersom dette er hva 90 grader er lik på skolens gulv. Derimot med mer friksjon så vil man bruke 90 grader istedenfor 87 for 90. Denne er blokkerende, men det er grunnet at dette er en rotasjon og tilnærmet null batteriliv skal gå ned av dette.
+    // 87 grader er lik 90
+    // Snur den 90 grader. 
     delay(5);
     sjekk1 = 0;
     sjekk2 = 0;

@@ -64,26 +64,24 @@ void irDecodeGarasje(){
         IR.resume();
     }
 }
-int howMuchGas = 0
-void irDecodeBensin(){
-    if (IR.decode())
-    {
-        Serial.println(IR.decodeIRData.decodedRawData);
-        if (IR.decodedIRData.decodedRawData == ?)       howMuchGas = 1; //25
-        if (IR.decodedIRData.decodedRawData == ??)      howMuchGas = 2; //50
-        if (IR.decodedIRData.decodedRawData == ???)     howMuchGas = 3; //75
-        if (IR.decodedIRData.decodedRawData == ????)    howMuchGas = 4; //100    
-    }  
-}
+int howMuchGas = 1;
+//void irDecodeBensin(){
+  //  if (IR.decode())
+    //  Serial.println(IR.decodeIRData.decodedRawData);
+      //  if (IR.decodedIRData.decodedRawData == ?)       howMuchGas = 1; //25
+        //if (IR.decodedIRData.decodedRawData == ??)      howMuchGas = 2; //50
+        //if (IR.decodedIRData.decodedRawData == ???)     howMuchGas = 3; //75
+        //if (IR.decodedIRData.decodedRawData == ????)    howMuchGas = 4; //100    
+    //}  
+//}
 
 int destination = 2;
-int currentPosition = 0;
+int currentPosition = 1;
 bool clockWise = 1;
 
 int caseNumGarage = 0;
 int currentPosGarage = 0;
-
-bool doDrive = 1;
+bool doDrive = 0;
 int charged = 0;
 
 void garage(){
@@ -91,8 +89,8 @@ void garage(){
     switch (caseNumGarage){
         case 0://Denne casen får zumo'n til å kjøre over linjen for så å rotere utifra hvilken retning den kommer fra(clockwise). Deretter kjører den frem, stopper og venter på ir signal.
             if(millis()-prevmillis<50){//Her må det være mindre enn samme verdi som 81.
-                if(clockWise) turndeg(90);
-                if(!clockWise) turndeg(-90);
+                if(clockWise) turndeg(-90);
+                if(!clockWise) turndeg(90);
                 prevcase = caseNum;
                 caseNum = 0;
                 linelength = 50;// Lengden bilen kjører over må være samme tall som i linje 76. Dette er slik at den ikke kjører lengre enn den skal.
@@ -154,50 +152,60 @@ void garage(){
                 }
             }
             break;
+        case 3:
+            if((millis()-prevmillis)<(linelength+400)){
+                turndeg(-90);
+                caseNumGarage = 1;
+                currentPosGarage = 8;
+            }
+            break;
     }
+    display.clear();
+    display.println(caseNumGarage);
+    display.print(currentPosGarage);
 }
 
 void gasStation(){
     followLinemaxSpeed = 200;
     if(millis()-prevmillis<50){//Her må det være mindre enn samme verdi som 81.
-                if(clockWise) turndeg(90);
-                if(!clockWise) turndeg(-90);
-                doDrive = 1;
+        if(clockWise) turndeg(90);
+        if(!clockWise) turndeg(-90);
+        doDrive = 1;
     }
     if(doDrive == 1){
         driveLinePID();
     }
     
     //irDecodeBensin();   //trenger ikke denne?
-    int chargePrevMillis = millis();
-    if (aboveAll && charged != 1){
+    chargePrevMillis = millis();
+    if (aboveAll() && charged != 1){
         motors.setSpeeds(0,0);
         doDrive = 0;
         if(clockWise) turndeg(90);
         if(!clockWise) turndeg(-90);
-        irDecodeBensin();
+        //irDecodeBensin();
         if(howMuchGas == 1){
             display.clear();
             display.gotoXY(0,0);
-            display.print("Charge: +25%")   //25% ladning
+            display.print("Charge: +25%");   //25% ladning
         }
 
         if(howMuchGas == 2){
             display.clear();
             display.gotoXY(0,0);
-            display.print("Charge: +50%")   // 50% ladning    
+            display.print("Charge: +50%");   // 50% ladning    
         }
 
         if(howMuchGas == 3){
             display.clear();
             display.gotoXY(0,0);
-            display.print("Charge: +75%")   //75% ladning    
+            display.print("Charge: +75%");   //75% ladning    
         }
 
         if(howMuchGas == 4){
             display.clear();
             display.gotoXY(0,0);
-            display.print("Charge: 100%")   //100% ladning    
+            display.print("Charge: 100%");   //100% ladning    
         }
 
         if (millis() - chargePrevMillis > 3000){
@@ -210,7 +218,7 @@ void gasStation(){
         }
     }
 
-    if(aboveAll && charged = 1){
+    if(aboveAll() && charged == 1){
         prevcase = caseNum;
         caseNum = 0;
         if(clockWise) turndeg(90);
