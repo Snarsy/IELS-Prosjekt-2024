@@ -1,8 +1,6 @@
 #include "Adafruit_APDS9960.h"
 #include <WiFi.h>
 #include <PubSubClient.h>
-#include <ArduinoJson.h>
-#include <ArduinoJson.hpp>
 
 
 WiFiClient espClient;
@@ -21,10 +19,13 @@ const char* mqtt_server = "10.25.18.134";
 //Manni $$$$$$
 
 int transactionCaseNumber = 0;
+
 //batterihelse
 int receivedBatteryHealth = 60;  
 int newbatteryhealth = receivedBatteryHealth;
 int boughtbatteryhealth = 0;
+
+int maxCharge = 50;
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -52,6 +53,7 @@ void receiveBatteryHealth(){
 void batterygestures(){
   //read a gesture from the device
   uint8_t gesture = apds.readGesture();
+
   if(gesture == APDS9960_DOWN){
       Serial.println("Price going down");
       boughtbatteryhealth -= 10;
@@ -59,46 +61,58 @@ void batterygestures(){
       Serial.print("New battery health =");
       Serial.println(newbatteryhealth);
   }
+
   if(gesture == APDS9960_UP){
+    if(maxCharge == batteryCharge){
+      Serial.println("MAX ALLOWED CHARGE");
+    }
       Serial.println("Price going up");
       boughtbatteryhealth += 10;
       newbatteryhealth = receivedBatteryHealth + boughtbatteryhealth;
       Serial.print("New battery health =");
       Serial.println(newbatteryhealth);        
   } 
+
   if(gesture == APDS9960_LEFT){
     transactionCaseNumber = 1;
   } 
+
   if(gesture == APDS9960_RIGHT){
     transactionCaseNumber = 2;
-} 
+  } 
 }
 
 void doyouwanttocancel(){
+
   Serial.println("Do you want to cancel the transaction?");
   Serial.println("Left - No     Right - Yes");
+
   uint8_t gesture = apds.readGesture();
+
   if (gesture == APDS9960_LEFT){
     Serial.println("Back to menu");
     transactionCaseNumber = 0;
   }
+
   if (gesture == APDS9960_RIGHT){
     Serial.println("Goodbye");
   }
 }
 
 void doyouwanttobuy(){
+
   Serial.print("Do you want to buy ");
   Serial.print(boughtbatteryhealth);
   Serial.println("% ?");
   Serial.println("Left - No     Right - Yes");
+
   uint8_t gesture = apds.readGesture();
 
   if (gesture == APDS9960_LEFT){
     Serial.println("Back to menu");
     transactionCaseNumber = 0;
   }
-  
+
   if (gesture == APDS9960_RIGHT){
     Serial.print("Bought ");
     Serial.print(boughtbatteryhealth);
@@ -113,6 +127,7 @@ void doyouwanttobuy(){
 // MQTT & WiFi setup
 
 void setup_wifi() {
+
   delay(10);
   Serial.println();
   Serial.print("Connecting to ");
@@ -167,7 +182,15 @@ void callback(String topic, byte *message, unsigned int length)
   {
     float tempFactor = messageTemp.toFloat();
     
+    if(tempFactor >= 1.11){
+      maxCharge = 80;
 
+    }else if(tempFactor >= 1.04 && tempFactor < 1.11){
+      maxCharge = 60;
+
+    }else if(tempFactor <= 1){
+      maxCharge = 50;
+    }
   }
 }
 
@@ -184,25 +207,25 @@ void loop() {
 }
 
 void transactionCase(){
-switch(transactionCaseNumber){
-  case 0:
-  batterygestures();
+  switch(transactionCaseNumber){
+    case 0:
+    batterygestures();
 
-  break;
+    break;
 
-  case 1:
-  //Cancel transaction?
-  doyouwanttocancel();
-  break;
+    case 1:
+    //Cancel transaction?
+    doyouwanttocancel();
+    break;
 
-  case 2:
-  // Purchase transaction?
-  doyouwanttobuy();
-  break;
+    case 2:
+    // Purchase transaction?
+    doyouwanttobuy();
+    break;
 
-  case 3:
-  Serial.println("Goodbye");
-  delay(1000);
-  break;
-}
+    case 3:
+    Serial.println("Goodbye");
+    delay(1000);
+    break;
+  }
 }
