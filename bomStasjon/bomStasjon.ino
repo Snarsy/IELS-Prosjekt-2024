@@ -19,6 +19,7 @@ void IRSender(){
     if(now - lastSentIR > IR_delay){
         lastSentIR = now;
         ir.sendNEC(hexForBom, 32);
+    }
 }
 
 void loop(){

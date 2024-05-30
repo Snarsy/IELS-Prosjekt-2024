@@ -1,6 +1,25 @@
 #include "Adafruit_APDS9960.h"
+#include <WiFi.h>
+#include <PubSubClient.h>
+#include <ArduinoJson.h>
+#include <ArduinoJson.hpp>
 
+
+WiFiClient espClient;
+PubSubClient client(espClient);
 Adafruit_APDS9960 apds;
+
+
+// MQTT-variabler
+
+const char* ssid = "NTNU-IOT";
+const char* password = "";
+const char* MQTT_UN = "fosfix";
+const char* MQTT_PW = "C4nn3ds0up3s321";
+const char* mqtt_server = "10.25.18.134";
+
+//Manni $$$$$$
+
 int transactionCaseNumber = 0;
 //batterihelse
 int receivedBatteryHealth = 60;  
@@ -82,6 +101,50 @@ void doyouwanttobuy(){
     Serial.println("%");
   }
 }
+
+
+// MQTT & WiFi setup
+
+void setup_wifi() {
+  delay(10);
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+}
+
+
+void reconnect() {
+    while (!client.connected()) {
+        Serial.print("Attempting MQTT connection...");
+
+        //Lager clientID
+        String clientId = "ESP32Client-";
+        clientId += String(random(0xffff), HEX);
+
+        //Prøver å koble seg på serveren
+        if(client.connect(clientId.c_str(), MQTT_UN, MQTT_PW)){
+            Serial.println("Connected!");
+        } 
+        else{
+            Serial.print("Failed, code=");
+            Serial.println(client.state());
+            delay(5000);
+        }
+    }   
+}
+
 
 
 // the loop function runs over and over again forever
