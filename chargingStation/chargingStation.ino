@@ -21,9 +21,7 @@ const char* mqtt_server = "10.25.18.134";
 int transactionCaseNumber = 0;
 
 //batterihelse
-int receivedBatteryHealth = 60;  
-int newbatteryhealth = receivedBatteryHealth;
-int boughtbatteryhealth = 0;
+int battery
 
 int maxCharge = 50;
 
@@ -55,16 +53,12 @@ void batterygestures(){
   uint8_t gesture = apds.readGesture();
 
   if(gesture == APDS9960_DOWN){
-      Serial.println("Price going down");
-      boughtbatteryhealth -= 10;
-      newbatteryhealth = receivedBatteryHealth + boughtbatteryhealth;
-      Serial.print("New battery health =");
-      Serial.println(newbatteryhealth);
+
   }
 
   if(gesture == APDS9960_UP){
     if(maxCharge == batteryCharge){
-      Serial.println("MAX ALLOWED CHARGE");
+
     }
       Serial.println("Price going up");
       boughtbatteryhealth += 10;
