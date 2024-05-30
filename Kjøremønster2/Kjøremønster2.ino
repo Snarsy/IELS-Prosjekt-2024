@@ -30,6 +30,8 @@ int driveOverNum = 0;
 int prevmillis = 0;
 int caseNum = 1;
 int linelength = 200;
+int chargePrevMillis;
+
 void driveOverLine(){
     switch (driveOverNum){
         case 0:
@@ -48,7 +50,7 @@ void driveOverLine(){
 }
 
 int parkingAvailable = 0;//Har nummeret 10 fram til bilen får ledig plass.
-void irDecode(){
+void irDecodeGarasje(){
     if(buttonC.isPressed()) parkingAvailable = 1; //Er til slik at det er mulig å teste garasjen uten diode. Fjerne ved endelig versjon.
     
     if (IR.decode())
@@ -62,6 +64,17 @@ void irDecode(){
         IR.resume();
     }
 }
+int howMuchGas = 0
+void irDecodeBensin(){
+    if (IR.decode())
+    {
+        Serial.println(IR.decodeIRData.decodedRawData);
+        if (IR.decodedIRData.decodedRawData == ?)       howMuchGas = 1; //25
+        if (IR.decodedIRData.decodedRawData == ??)      howMuchGas = 2; //50
+        if (IR.decodedIRData.decodedRawData == ???)     howMuchGas = 3; //75
+        if (IR.decodedIRData.decodedRawData == ????)    howMuchGas = 4; //100    
+    }  
+}
 
 int destination = 2;
 int currentPosition = 0;
@@ -69,6 +82,10 @@ bool clockWise = 1;
 
 int caseNumGarage = 0;
 int currentPosGarage = 0;
+
+bool doDrive = 1;
+int charged = 0;
+
 void garage(){
     followLinemaxSpeed = 200;
     switch (caseNumGarage){
@@ -83,7 +100,7 @@ void garage(){
             }
             motors.setSpeeds(0,0);
             linelength = 400;//Hvor mange millisekunder zumo'n skal kjøre over en linje
-            irDecode();
+            irDecodeGarasje();
             if(parkingAvailable != 0){
                 caseNumGarage = 1;
             }
@@ -140,9 +157,70 @@ void garage(){
     }
 }
 
-void yx(){
-    motors.setSpeeds(0,0);
+void gasStation(){
+    followLinemaxSpeed = 200;
+    if(millis()-prevmillis<50){//Her må det være mindre enn samme verdi som 81.
+                if(clockWise) turndeg(90);
+                if(!clockWise) turndeg(-90);
+                doDrive = 1;
+    }
+    if(doDrive == 1){
+        driveLinePID();
+    }
+    
+    //irDecodeBensin();   //trenger ikke denne?
+    int chargePrevMillis = millis();
+    if (aboveAll && charged != 1){
+        motors.setSpeeds(0,0);
+        doDrive = 0;
+        if(clockWise) turndeg(90);
+        if(!clockWise) turndeg(-90);
+        irDecodeBensin();
+        if(howMuchGas == 1){
+            display.clear();
+            display.gotoXY(0,0);
+            display.print("Charge: +25%")   //25% ladning
+        }
+
+        if(howMuchGas == 2){
+            display.clear();
+            display.gotoXY(0,0);
+            display.print("Charge: +50%")   // 50% ladning    
+        }
+
+        if(howMuchGas == 3){
+            display.clear();
+            display.gotoXY(0,0);
+            display.print("Charge: +75%")   //75% ladning    
+        }
+
+        if(howMuchGas == 4){
+            display.clear();
+            display.gotoXY(0,0);
+            display.print("Charge: 100%")   //100% ladning    
+        }
+
+        if (millis() - chargePrevMillis > 3000){
+            prevcase = caseNum;
+            caseNum = 0;
+            charged = 1;
+            if(clockWise) turndeg(-90);
+            if(!clockWise) turndeg(90);
+            doDrive = 1;
+        }
+    }
+
+    if(aboveAll && charged = 1){
+        prevcase = caseNum;
+        caseNum = 0;
+        if(clockWise) turndeg(90);
+        if(!clockWise) turndeg(-90);
+        doDrive = 1;
+    }
 }
+
+    
+
 
 void setup(){
     IR.begin(IRPin, ENABLE_LED_FEEDBACK);
@@ -189,7 +267,7 @@ void loop(){
             garage();
             break;
         case 3:
-            yx();
+            gasStation();
             break;
     }
 }
