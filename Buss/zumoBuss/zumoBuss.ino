@@ -12,7 +12,6 @@ byte RxByte;
 
 int speedCaseInt = 0;
 
-unsigned int lineSensorValues1[5] = {0, 0, 0, 0, 0};
 
 #include "TurnSensor.h"
 
@@ -35,27 +34,39 @@ void setup() {
   Serial.begin(9600);
   display.setLayout21x8();
   display.clear();
-  //turnSensorSetup();
+  turnSensorSetup();
   delay(1000);
-  calibrating();
-}
- 
-void calibrating()
-{ //Kalibrerer linjesensor
-    for (int i = 0; i < 60; i++)
-    {
-        motors.setSpeeds(200, -200);
-        lineSensors.calibrate();
-        delay(10);
-    }
-    display.clear();
-    motors.setSpeeds(0, 0);
-    delay(1000);
 }
 
+void driveLinePIDNormalSpeed()
+{ //Linjefølging tatt fra Kevin Pololu. 
+    int16_t position = lineSensors.readLine(lineSensorValues); //Leser linjeesensor. 
+    int16_t error = position - 2000; //Finnet ut om det er venstre eller høyre som er mer utenfor linjen.
+    int16_t speedDifference = error / 1 + 4 * (error - lastError); 
 
+    lastError = error;
 
-    motors.setSpeeds(Lspeed, Rspeed);
+    int leftSpeed = followLinemaxSpeed + speedDifference;
+    int rightSpeed = followLinemaxSpeed - speedDifference;
+    leftSpeed = constrain(leftSpeed, 0, (int16_t)followLinemaxSpeed); //Constrain for å ikke få minus, og ikke over 400 verdi. 
+    rightSpeed = constrain(rightSpeed, 0, (int16_t)followLinemaxSpeed);
+
+    motors.setSpeeds(leftSpeed, rightSpeed);
+}
+
+void driveLinePIDSlowSpeed(){
+    int16_t position = lineSensors.readLine(lineSensorValues); //Leser linjeesensor. 
+    int16_t error = position - 2000; //Finnet ut om det er venstre eller høyre som er mer utenfor linjen.
+    int16_t speedDifference = error / 1 + 4 * (error - lastError); 
+
+    lastError = error;
+
+    int leftSpeed = followLinemaxSpeed*0.5 + speedDifference;
+    int rightSpeed = followLinemaxSpeed*0.5 - speedDifference;
+    leftSpeed = constrain(leftSpeed, 0, (int16_t)followLinemaxSpeed); //Constrain for å ikke få minus, og ikke over 400 verdi. 
+    rightSpeed = constrain(rightSpeed, 0, (int16_t)followLinemaxSpeed);
+
+    motors.setSpeeds(leftSpeed, rightSpeed);
 }
 
 void receiveByte(){
@@ -79,16 +90,16 @@ void busstop(){
         delay(100);
         motors.setSpeeds(0,0);
         // Play G4 (392 Hz)
-        buzzer.playFrequency(392, 100, 15); // Frequency, duration in ms, volume (0-15)
-        delay(100); // 250ms tone + 100ms delay
+        buzzer.playFrequency(392, 250, 15); // Frequency, duration in ms, volume (0-15)
+        delay(250); 
 
         // Play D5 (587 Hz)
-        buzzer.playFrequency(587, 100, 15); // Frequency, duration in ms, volume (0-15)
-        delay(100); // 250ms tone + 100ms delay
+        buzzer.playFrequency(587, 250, 15); // Frequency, duration in ms, volume (0-15)
+        delay(250); 
 
         // Play G5 (784 Hz)
-        buzzer.playFrequency(784, 100, 15); // Frequency, duration in ms, volume (0-15)
-        delay(100); // 250ms tone + 100ms delay
+        buzzer.playFrequency(784, 250, 15); // Frequency, duration in ms, volume (0-15)
+        delay(250); 
         delay(5000);
     }
 }
@@ -97,11 +108,11 @@ void speedCase(){
     switch (speedCaseInt)
     {
     case 0:
-            driveLineStandardHighSpeed();
+            driveLinePIDNormalSpeed();
         break;
     
     case 1:
-            driveLineStandardLowSpeed();
+            driveLinePIDSlowSpeed();
         break;
     
     case 2:
