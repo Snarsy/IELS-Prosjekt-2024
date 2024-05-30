@@ -1,12 +1,19 @@
 #include "Adafruit_APDS9960.h"
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include <IRremoteESP8266.h>
+#include <IRsend.h>
+
+IRsend irsend(IRPin);
+
 
 
 WiFiClient espClient;
 PubSubClient client(espClient);
 Adafruit_APDS9960 apds;
 
+
+const uint16_t IRPin = 32;  // ESP32 pin GPIO 32
 
 // MQTT-variabler
 
@@ -33,6 +40,8 @@ void setup() {
       Serial.println("failed to initialize device! Please check your wiring.");
     }
     else Serial.println("Device initialized!");
+
+    irsend.begin();
 
     //gesture mode will be entered once proximity mode senses something close
     apds.enableProximity(true);
@@ -117,6 +126,18 @@ void doyouwanttocancel(){
 
 void doyouwanttobuy(){
 
+  display.clear();
+  display.gotoXY(5,1);
+  display.print("Godkjenn kjøpet");
+  display.gotoXY(1,6);
+  display.print("Venstre");
+  display.gotoXY(2,7);
+  display.print("Nei");
+  display.gotoXY(16,6);
+  display.print("Høyre");
+  display.gotoXY(18, 7);
+  display.print("Ja");
+
   uint8_t gesture = apds.readGesture();
 
   if (gesture == APDS9960_LEFT){
@@ -125,12 +146,6 @@ void doyouwanttobuy(){
   }
 
   if (gesture == APDS9960_RIGHT){
-    Serial.print("Bought ");
-    Serial.print(boughtbatteryhealth);
-    Serial.println("%");
-    Serial.print("Batteryhealth: ");
-    Serial.print(newbatteryhealth);
-    Serial.println("%");
   }
 }
 
