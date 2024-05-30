@@ -69,6 +69,7 @@ void irCase(){
 void irDecode(){
     if (IR.decode())
     {
+        display.clear();
         Serial.println(IR.decodedIRData.decodedRawData);
         Serial.println("Test");
         display.gotoXY(0,0);
