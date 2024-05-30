@@ -68,10 +68,17 @@ int howMuchGas = 1;
 //void irDecodeBensin(){
   //  if (IR.decode())
     //  Serial.println(IR.decodeIRData.decodedRawData);
-      //  if (IR.decodedIRData.decodedRawData == ?)       howMuchGas = 1; //25
-        //if (IR.decodedIRData.decodedRawData == ??)      howMuchGas = 2; //50
-        //if (IR.decodedIRData.decodedRawData == ???)     howMuchGas = 3; //75
-        //if (IR.decodedIRData.decodedRawData == ????)    howMuchGas = 4; //100    
+      //  if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 1; //10
+        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 2; //20
+        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 3; //30
+        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 4; //40
+        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 5; //50   
+        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 6; //60
+        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 7; //70
+        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 8; //80
+        ////if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 9; //90
+        ////if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 10; //100
+        
     //}  
 //}
 
@@ -184,31 +191,42 @@ void gasStation(){
         if(clockWise) turndeg(90);
         if(!clockWise) turndeg(-90);
         //irDecodeBensin();
+        display.clear();
+        display.gotoXY(0,0);
         if(howMuchGas == 1){
-            display.clear();
-            display.gotoXY(0,0);
-            display.print("Charge: +25%");   //25% ladning
+            display.print("Lading: +10%");
         }
 
         if(howMuchGas == 2){
-            display.clear();
-            display.gotoXY(0,0);
-            display.print("Charge: +50%");   // 50% ladning    
+            display.print("Lading: +20%");
         }
 
         if(howMuchGas == 3){
-            display.clear();
-            display.gotoXY(0,0);
-            display.print("Charge: +75%");   //75% ladning    
+            display.print("Lading: +30%");
         }
 
         if(howMuchGas == 4){
-            display.clear();
-            display.gotoXY(0,0);
-            display.print("Charge: 100%");   //100% ladning    
+            display.print("Lading: +40%");
         }
 
+        if(howMuchGas == 5){
+            display.print("Lading: +50%");
+        }
+
+        if(howMuchGas == 6){
+            display.print("Lading: +60%");
+        }
+
+        if(howMuchGas == 7){
+            display.print("Lading: +70%");
+        }
+
+        if(howMuchGas == 8){
+            display.print("Lading: +80%");
+        }
+        
         if (millis() - chargePrevMillis > 3000){
+            display.clear();
             prevcase = caseNum;
             caseNum = 0;
             charged = 1;
@@ -217,6 +235,8 @@ void gasStation(){
             doDrive = 1;
         }
     }
+
+
 
     if(aboveAll() && charged == 1){
         prevcase = caseNum;
