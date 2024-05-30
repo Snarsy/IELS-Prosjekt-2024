@@ -28,16 +28,21 @@ int boughtbatteryhealth = 0;
 
 // the setup function runs once when you press reset or power the board
 void setup() {
-Serial.begin(115200);
+  
+    Serial.begin(9600);
 
-if(!apds.begin()){
-  Serial.println("failed to initialize device! Please check your wiring.");
-}
-else Serial.println("Device initialized!");
+    if(!apds.begin()){
+      Serial.println("failed to initialize device! Please check your wiring.");
+    }
+    else Serial.println("Device initialized!");
 
-//gesture mode will be entered once proximity mode senses something close
-apds.enableProximity(true);
-apds.enableGesture(true);
+    //gesture mode will be entered once proximity mode senses something close
+    apds.enableProximity(true);
+    apds.enableGesture(true);
+
+    setup_wifi();
+    client.setServer(mqtt_server, 1883);
+    client.setCallback(callback);
 }
 
 void receiveBatteryHealth(){
@@ -88,10 +93,12 @@ void doyouwanttobuy(){
   Serial.println("% ?");
   Serial.println("Left - No     Right - Yes");
   uint8_t gesture = apds.readGesture();
+
   if (gesture == APDS9960_LEFT){
     Serial.println("Back to menu");
     transactionCaseNumber = 0;
   }
+  
   if (gesture == APDS9960_RIGHT){
     Serial.print("Bought ");
     Serial.print(boughtbatteryhealth);
@@ -145,11 +152,35 @@ void reconnect() {
     }   
 }
 
+void callback(String topic, byte *message, unsigned int length)
+{
+  String messageTemp;
+
+  for (int i = 0; i < length; i++)
+  {
+    //Serial.print((char)message[i]);
+    messageTemp += (char)message[i];
+  }
+  Serial.println();
+
+  if (topic == "stromforing/kfaktor")
+  {
+    float tempFactor = messageTemp.toFloat();
+    
+
+  }
+}
 
 
 // the loop function runs over and over again forever
 void loop() {
-transactionCase();
+
+  if (!client.connected()) {
+        reconnect();
+  }
+  client.loop();  
+  
+  transactionCase();
 }
 
 void transactionCase(){
