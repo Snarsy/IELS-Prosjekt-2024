@@ -93,12 +93,20 @@ void setup(){
     if (mySensor.beginI2C() == false){
         Serial.println("The sensor did not respond. Please check wiring.");
     while(1); //Freeze
-    }    
+    }
 
+    setup_wifi();
+    client.setServer(mqtt_server, 1883);    
 }
 
 void loop(){
-    temperature = mySensor.readTempF();
-    
+    delay(100);
+
+    if (!client.connected()) {
+        reconnect();
+    }
+    client.loop();
+
+    temperature = mySensor.readTempC();
     sendTempInfo();
 }
