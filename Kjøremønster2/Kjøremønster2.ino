@@ -64,25 +64,23 @@ void irDecodeGarasje(){
         IR.resume();
     }
 }
-int howMuchGas = 0
-void irDecodeBensin(){
-    if (IR.decode())
-    {
-        Serial.println(IR.decodeIRData.decodedRawData);
-        if (IR.decodedIRData.decodedRawData == ?)       howMuchGas = 1; //25
-        if (IR.decodedIRData.decodedRawData == ??)      howMuchGas = 2; //50
-        if (IR.decodedIRData.decodedRawData == ???)     howMuchGas = 3; //75
-        if (IR.decodedIRData.decodedRawData == ????)    howMuchGas = 4; //100    
-    }  
-}
+int howMuchGas = 1;
+//void irDecodeBensin(){
+  //  if (IR.decode())
+    //  Serial.println(IR.decodeIRData.decodedRawData);
+      //  if (IR.decodedIRData.decodedRawData == ?)       howMuchGas = 1; //25
+        //if (IR.decodedIRData.decodedRawData == ??)      howMuchGas = 2; //50
+        //if (IR.decodedIRData.decodedRawData == ???)     howMuchGas = 3; //75
+        //if (IR.decodedIRData.decodedRawData == ????)    howMuchGas = 4; //100    
+    //}  
+//}
 
-int destination = 1;
-int currentPosition = 2;
-bool clockWise = 0;
+int destination = 2;
+int currentPosition = 0;
+bool clockWise = 1;
 
 int caseNumGarage = 0;
 int currentPosGarage = 0;
-
 bool doDrive = 1;
 int charged = 0;
 
@@ -180,34 +178,34 @@ void gasStation(){
     
     //irDecodeBensin();   //trenger ikke denne?
     int chargePrevMillis = millis();
-    if (aboveAll && charged != 1){
+    if (aboveAll() && charged != 1){
         motors.setSpeeds(0,0);
         doDrive = 0;
         if(clockWise) turndeg(90);
         if(!clockWise) turndeg(-90);
-        irDecodeBensin();
+        //irDecodeBensin();
         if(howMuchGas == 1){
             display.clear();
             display.gotoXY(0,0);
-            display.print("Charge: +25%")   //25% ladning
+            display.print("Charge: +25%");   //25% ladning
         }
 
         if(howMuchGas == 2){
             display.clear();
             display.gotoXY(0,0);
-            display.print("Charge: +50%")   // 50% ladning    
+            display.print("Charge: +50%");   // 50% ladning    
         }
 
         if(howMuchGas == 3){
             display.clear();
             display.gotoXY(0,0);
-            display.print("Charge: +75%")   //75% ladning    
+            display.print("Charge: +75%");   //75% ladning    
         }
 
         if(howMuchGas == 4){
             display.clear();
             display.gotoXY(0,0);
-            display.print("Charge: 100%")   //100% ladning    
+            display.print("Charge: 100%");   //100% ladning    
         }
 
         if (millis() - chargePrevMillis > 3000){
@@ -220,7 +218,7 @@ void gasStation(){
         }
     }
 
-    if(aboveAll && charged = 1){
+    if(aboveAll() && charged == 1){
         prevcase = caseNum;
         caseNum = 0;
         if(clockWise) turndeg(90);
