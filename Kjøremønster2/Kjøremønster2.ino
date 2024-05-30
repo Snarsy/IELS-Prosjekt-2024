@@ -76,12 +76,12 @@ int howMuchGas = 1;
 //}
 
 int destination = 2;
-int currentPosition = 0;
+int currentPosition = 1;
 bool clockWise = 1;
 
 int caseNumGarage = 0;
 int currentPosGarage = 0;
-bool doDrive = 1;
+bool doDrive = 0;
 int charged = 0;
 
 void garage(){
@@ -168,16 +168,16 @@ void garage(){
 void gasStation(){
     followLinemaxSpeed = 200;
     if(millis()-prevmillis<50){//Her må det være mindre enn samme verdi som 81.
-                if(clockWise) turndeg(90);
-                if(!clockWise) turndeg(-90);
-                doDrive = 1;
+        if(clockWise) turndeg(90);
+        if(!clockWise) turndeg(-90);
+        doDrive = 1;
     }
     if(doDrive == 1){
         driveLinePID();
     }
     
     //irDecodeBensin();   //trenger ikke denne?
-    int chargePrevMillis = millis();
+    chargePrevMillis = millis();
     if (aboveAll() && charged != 1){
         motors.setSpeeds(0,0);
         doDrive = 0;
