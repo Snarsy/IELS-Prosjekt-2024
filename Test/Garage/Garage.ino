@@ -63,17 +63,82 @@ void irDecode(){
         Serial.println(IR.decodedIRData.decodedRawData);
         if (IR.decodedIRData.decodedRawData == 2592268650)  ledigplass = 0; //Første verdi
         if (IR.decodedIRData.decodedRawData == 510274632)   ledigplass = 1; //Andre verdi
-        if (IR.decodedIRData.decodedRawData == 1277849113 ) ledigplass = 2; //Tredje verdi
-        if (IR.decodedIRData.decodedRawData == 2163717077 ) ledigplass = 3; //Fjerde verdi
-        if (IR.decodedIRData.decodedRawData == 2227349217 ) ledigplass = 4; //Femte verdi
+        if (IR.decodedIRData.decodedRawData == 1277849113)  ledigplass = 2; //Tredje verdi
+        if (IR.decodedIRData.decodedRawData == 2163717077)  ledigplass = 3; //Fjerde verdi
+        if (IR.decodedIRData.decodedRawData == 2227349217)  ledigplass = 4; //Femte verdi
         IR.resume();
     }
 }
 void garage(){
     switch (caseNumGarage){
+<<<<<<< Updated upstream:Test/Garage/Garage.ino
         case 0://Bilen kjører til den skal stoppe og kjører hvis den får ir signal.
             if(millis()-prevmillis>driveovertime){
               motors.setSpeeds(0,0);
+=======
+                case 0://Bilen kjører til den skal stoppe og kjører hvis den får ir signal.
+                    if(millis()-prevmillis>driveovertime){
+                      motors.setSpeeds(0,0);
+                    }
+                    irDecode();
+                    if(ledigplass!=10){
+                      caseNumGarage = 1;
+                    }
+                break;
+                case 1://Bilen kjører til den når riktig plass.
+                    followLinemaxSpeed = 150;
+                    readSensors();
+                    if(aboveLine(0) && aboveLine(1) && (currentplass) == ledigplass){//Hvis den er på riktig plass vil den rotere 90 grader 
+                        if(ledigplass == 0){//Er den på første plass så vil den rotere og kjøre ut. Den vil bytte til linjefølger og gå tilbake til hovedcase.
+                        turndeg(-87);
+                        caseNum = 0;
+                        caseNumGarage = 0;
+                        break;
+                        }
+                        caseNumGarage = 3;//Bytter til innkjøringscase 3
+                        prevmillis = millis();
+                    }
+                    else if(aboveLine(0) && aboveLine(1)){//Hvis den ikke er ved plassen vil den bytte til case 2
+                        currentplass = currentplass + 1;
+                        caseNumGarage = 2;
+                        prevmillis = millis();
+                    }
+                    driveLinePID();
+                break;
+                case 2://Vil kjøre over krysset og bytte til case 1 når den er kjørt over
+                    motors.setSpeeds(100,100);
+                    if(millis()-prevmillis>driveovertime){
+                        caseNumGarage = 1;
+                    }
+                break;
+                case 3://Innkjøringscase. Kjører inn
+                    motors.setSpeeds(100,100);
+                    if(millis()-prevmillis>400){
+                        motors.setSpeeds(0,0);
+                        turndeg(-87);
+                        motors.setSpeeds(100,100);
+                        prevmillis = millis();
+                        caseNumGarage = 4;
+                    }
+                break;
+                case 4:
+                readSensors();
+                if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4)){
+                    motors.setSpeeds(0,0);
+                    turndeg(176);
+                    caseNumGarage = 5;
+                    prevmillis = millis();
+                }
+                break;
+                case 5:
+                    if(millis()-prevmillis>5000){
+                        driveLinePID();
+                        if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4)){
+                            turndeg(-87);
+                        }
+                    }
+                break;
+>>>>>>> Stashed changes:Garage/Garage.ino
             }
             
             irDecode();
