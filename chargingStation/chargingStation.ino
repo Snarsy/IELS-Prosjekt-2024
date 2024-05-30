@@ -111,15 +111,11 @@ void doyouwanttocancel(){
     display.print("Hade!");
     delay(2000);
     batteryCharge = 0;
+    transactionCaseNumber = 3;
   }
 }
 
 void doyouwanttobuy(){
-
-  Serial.print("Do you want to buy ");
-  Serial.print(boughtbatteryhealth);
-  Serial.println("% ?");
-  Serial.println("Left - No     Right - Yes");
 
   uint8_t gesture = apds.readGesture();
 
@@ -136,6 +132,10 @@ void doyouwanttobuy(){
     Serial.print(newbatteryhealth);
     Serial.println("%");
   }
+}
+
+void sendCharge(){
+
 }
 
 
@@ -230,17 +230,16 @@ void transactionCase(){
 
     case 1:
     //Cancel transaction?
-    doyouwanttocancel();
+      doyouwanttocancel();
     break;
 
     case 2:
     // Purchase transaction?
-    doyouwanttobuy();
+      doyouwanttobuy();
     break;
 
     case 3:
-    Serial.println("Goodbye");
-    delay(1000);
+      sendCharge();
     break;
   }
 }
