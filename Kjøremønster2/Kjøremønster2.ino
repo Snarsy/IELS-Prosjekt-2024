@@ -75,9 +75,9 @@ int howMuchGas = 1;
     //}  
 //}
 
-int destination = 2;
-int currentPosition = 1;
-bool clockWise = 1;
+int destination = 1;
+int currentPosition = 2;
+bool clockWise = 0;
 
 int caseNumGarage = 0;
 int currentPosGarage = 0;
@@ -88,12 +88,12 @@ void garage(){
     followLinemaxSpeed = 200;
     switch (caseNumGarage){
         case 0://Denne casen får zumo'n til å kjøre over linjen for så å rotere utifra hvilken retning den kommer fra(clockwise). Deretter kjører den frem, stopper og venter på ir signal.
-            if(millis()-prevmillis<50){//Her må det være mindre enn samme verdi som 81.
-                if(clockWise) turndeg(-90);
-                if(!clockWise) turndeg(90);
+            if(millis()-prevmillis<100){//Her må det være mindre enn samme verdi som 81.
+                if(clockWise){turndeg(-90);};
+                if(!clockWise){turndeg(90);};
                 prevcase = caseNum;
                 caseNum = 0;
-                linelength = 50;// Lengden bilen kjører over må være samme tall som i linje 76. Dette er slik at den ikke kjører lengre enn den skal.
+                linelength = 500;// Lengden bilen kjører over må være samme tall som i linje 76. Dette er slik at den ikke kjører lengre enn den skal.
                 break;
             }
             motors.setSpeeds(0,0);
@@ -227,7 +227,42 @@ void gasStation(){
     }
 }
 
-    
+void driving(){
+    switch (caseNum){           //Hovedcase for bilkjøringen. Kan evt legges inn i en void hvis dette ser bedre ut.
+            case 0:                 //driveoverline vil kjøre over en linje og returnere til det den gjorde før. Dette gjør at man kan kjøre over kryss og fortsette videre i koden. Husk prevcase = casenum før man setter casenum = 0.
+                driveOverLine();
+                break;
+            case 1:                 //Generellt kjørecase. Vil kjøre over linjene til den treffer ønsket posisjon
+                driveLinePID();
+                if(aboveAll()){     //Treffer bilen et kryss vil den stoppe og kjøre over for så å oppdatere plasseringen.
+                    prevcase = caseNum;
+                    caseNum = 0;
+                    if(clockWise == 1){
+                        currentPosition = currentPosition + 1;
+                    }
+                    else{
+                        currentPosition = currentPosition - 1;
+                    }
+                    break;
+                }
+                if(currentPosition == destination){//Hvis bilen er på riktig plass vil den rotere 90 grader og bytte til kjøremønsteret for destinasjonen.
+                    prevmillis = millis();
+                    if(destination == 1){//I dette tilfellet er destination = 3, garasjen.
+                        caseNum = 2;
+                    }
+                    else if(destination == 2){
+                        caseNum = 3;
+                    }
+                }
+                break;
+            case 2:
+                garage();
+                break;
+            case 3:
+                gasStation();
+                break;
+        }
+}    
 
 
 void setup(){
@@ -238,46 +273,7 @@ void setup(){
 }
 
 void loop(){
-    switch (caseNum){           //Hovedcase for bilkjøringen. Kan evt legges inn i en void hvis dette ser bedre ut.
-        case 0:                 //driveoverline vil kjøre over en linje og returnere til det den gjorde før. Dette gjør at man kan kjøre over kryss og fortsette videre i koden. Husk prevcase = casenum før man setter casenum = 0.
-            driveOverLine();
-            break;
-        case 1:                 //Generellt kjørecase. Vil kjøre over linjene til den treffer ønsket posisjon
-            driveLinePID();
-            if(currentPosition>destination && clockWise == 1){//Denne gjør at bilen vil endre rettning for å komme seg raskeere til ønsket posisjon.
-                clockWise = 0;
-                turnSensorReset();
-                turndeg(175);
-                break;
-            }
-            if(aboveAll()){     //Treffer bilen et kryss vil den stoppe og kjøre over for så å oppdatere plasseringen.
-                prevcase = caseNum;
-                caseNum = 0;
-                if(clockWise == 1){
-                    currentPosition = currentPosition + 1;
-                }
-                else{
-                    currentPosition = currentPosition - 1;
-                }
-                break;
-            }
-            if(currentPosition == destination){//Hvis bilen er på riktig plass vil den rotere 90 grader og bytte til kjøremønsteret for destinasjonen.
-                prevmillis = millis();
-                if(destination == 1){//I dette tilfellet er destination = 3, garasjen.
-                    caseNum = 2;
-                }
-                else if(destination == 2){
-                    caseNum = 3;
-                }
-            }
-            break;
-        case 2:
-            garage();
-            break;
-        case 3:
-            gasStation();
-            break;
-    }
+    driving();
 }
 
 void tollGate(){ //Tar imot bompengepriser
