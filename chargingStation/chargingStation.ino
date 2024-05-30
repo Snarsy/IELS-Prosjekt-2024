@@ -21,8 +21,7 @@ const char* mqtt_server = "10.25.18.134";
 int transactionCaseNumber = 0;
 
 //batterihelse
-int battery
-
+int batteryCharge = 50;
 int maxCharge = 50;
 
 // the setup function runs once when you press reset or power the board
@@ -50,21 +49,31 @@ void receiveBatteryHealth(){
 
 void batterygestures(){
   //read a gesture from the device
+  display.clear();
+  display.gotoXY(5, 1);
+  display.print("Ladeprosent");
+  display.gotoXY(5, 4);
+  display.print(batteryCharge);
+
   uint8_t gesture = apds.readGesture();
 
   if(gesture == APDS9960_DOWN){
-
+    batteryCharge -= 10;
   }
 
   if(gesture == APDS9960_UP){
     if(maxCharge == batteryCharge){
-
-    }
-      Serial.println("Price going up");
-      boughtbatteryhealth += 10;
-      newbatteryhealth = receivedBatteryHealth + boughtbatteryhealth;
-      Serial.print("New battery health =");
-      Serial.println(newbatteryhealth);        
+      display.clear();
+      display.gotoXY(5,1);
+      display.print("Maksimalt");
+      display.gotoXY(5,4);
+      display.print("ladingsnivå");
+      display.gotoXY(10,7);
+      display.print("nådd!")
+      delay(3000);
+    } else{
+      batteryCharge += 10;  
+    } 
   } 
 
   if(gesture == APDS9960_LEFT){
@@ -78,18 +87,30 @@ void batterygestures(){
 
 void doyouwanttocancel(){
 
-  Serial.println("Do you want to cancel the transaction?");
-  Serial.println("Left - No     Right - Yes");
+  display.clear();
+  display.gotoXY(2,1):
+  display.print("Vil du avbryte?")
+  display.gotoXY(1, 6);
+  display.print("Venstre")
+  display.gotoXY(2, 7);
+  display.print("Nei");
+  display.gotoXY(16, 6);
+  display.print("Høyre");
+  display.gotoXY(18, 7);
+  display.print("Ja");
 
   uint8_t gesture = apds.readGesture();
 
   if (gesture == APDS9960_LEFT){
-    Serial.println("Back to menu");
     transactionCaseNumber = 0;
   }
 
   if (gesture == APDS9960_RIGHT){
-    Serial.println("Goodbye");
+    display.clear();
+    display.gotoXY(8,3);
+    display.print("Hade!");
+    delay(2000);
+    batteryCharge = 0;
   }
 }
 
