@@ -294,8 +294,23 @@ void setup(){
 
 void loop(){
     driving();
+    tollGate();
 }
 
-void tollGate(){ //Tar imot bompengepriser
+void tollGate(){ //Tar imot bompenger, denne må være bare om det er dieselbil
+    if (IR.decode()){
+        if (IR.decodedIRData.decodedRawData == 1217527807){
+            //Spille G4
+            buzzer.playFrequency(392, 250, 15);
+            delay(250); 
 
+            // Spille D5 (587 Hz)
+            buzzer.playFrequency(587, 250, 15); 
+            delay(250); 
+
+            // Spille G5 (784 Hz)
+            buzzer.playFrequency(784, 250, 15);
+            delay(250); 
+        }
+    }
 }
