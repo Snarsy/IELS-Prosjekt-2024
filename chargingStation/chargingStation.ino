@@ -141,11 +141,11 @@ void doyouwanttobuy(){
   uint8_t gesture = apds.readGesture();
 
   if (gesture == APDS9960_LEFT){
-    Serial.println("Back to menu");
     transactionCaseNumber = 0;
   }
 
   if (gesture == APDS9960_RIGHT){
+    transactionCaseNumber = 3;
   }
 }
 
