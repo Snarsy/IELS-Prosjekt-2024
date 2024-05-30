@@ -34,6 +34,7 @@ void setup()
     Serial.begin(9600);
     lineSensors.initFiveSensors();
     proxSensors.initFrontSensor();
+    display.setLayout21x8();
     IR.begin(IRPin, ENABLE_LED_FEEDBACK);
     
 }
@@ -68,7 +69,11 @@ void irCase(){
 void irDecode(){
     if (IR.decode())
     {
+        display.clear();
         Serial.println(IR.decodedIRData.decodedRawData);
+        Serial.println("Test");
+        display.gotoXY(0,0);
+        display.print(IR.decodedIRData.decodedRawData);
         if (IR.decodedIRData.decodedRawData == 2592268650) irGarageCase = 1; //Første verdi
         if (IR.decodedIRData.decodedRawData == 510274632) irGarageCase = 2; //Andre verdi
         if (IR.decodedIRData.decodedRawData == 1277849113 ) irGarageCase = 3; //Tredje verdi
@@ -84,4 +89,6 @@ void irDecode(){
 void loop()
 {
    irCase();
+   display.gotoXY(4,4);
+   display.print(".");
 }
