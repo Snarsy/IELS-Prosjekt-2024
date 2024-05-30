@@ -23,6 +23,15 @@ const char* MQTT_UN = "fosfix";
 const char* MQTT_PW = "C4nn3ds0up3s321";
 const char* mqtt_server = "10.25.18.134";
 
+const int hexForIR_howMuchGas1 = 0x11111111;
+const int hexForIR_howMuchGas2 = 0x11111112;
+const int hexForIR_howMuchGas3 = 0x11111122;
+const int hexForIR_howMuchGas4 = 0x11111222;
+const int hexForIR_howMuchGas5 = 0x11112222;
+const int hexForIR_howMuchGas6 = 0x11122222;
+const int hexForIR_howMuchGas7 = 0x11222222;
+const int hexForIR_howMuchGas8 = 0x12222222;
+
 //Manni $$$$$$
 
 int transactionCaseNumber = 0;
@@ -150,6 +159,7 @@ void doyouwanttobuy(){
 }
 
 void sendCharge(){
+
 
 }
 
