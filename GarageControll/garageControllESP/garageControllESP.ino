@@ -233,14 +233,13 @@ void IR_for_parking(){
         }
     }*/
     if(irrecv.decode(&results)){
-<<<<<<< HEAD
-=======
+
+
         
     for(int posDegrees = 0; posDegrees <= 90; posDegrees++) {
         servo1.write(posDegrees);
         delay(20);
     }
->>>>>>> 378b2dd (Servo update)
 
         //Dersom ingen ledige plasser, si ifra til bil
         if(noSpotsAvailable){
