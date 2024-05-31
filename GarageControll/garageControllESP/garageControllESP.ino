@@ -21,7 +21,7 @@ const char* MQTT_PW = "C4nn3ds0up3s321";
 const char* mqtt_server = "10.25.18.134";
 
 
-// Parkingvariabler
+// Parkeringvariabler
 
 volatile int parkingSpace, availability = -1;
 
@@ -47,7 +47,7 @@ const int ledPin_4 = 27;
 int ledPinArray[spaceNumber] = {ledPin_1, ledPin_2, ledPin_3, ledPin_4};
 
 
-// IR-sending variabler
+// IR-variabler
 
 const uint16_t IRPin = 32;  // ESP32 pin GPIO 32
 const uint16_t IRRecievePin = 33; //ESP32 pin GPIO 33
@@ -63,6 +63,8 @@ const int hexForIR_ElectricCar = 3292233855;
 int hexForIR_Array[spaceNumber] = {hexForIR_parkingSpace1 ,hexForIR_parkingSpace2, hexForIR_parkingSpace3 ,hexForIR_parkingSpace4};
 
 long lastSentIR = 0;
+
+//Servo-variabler
 
 static const int servoPin = 4;
 
@@ -233,38 +235,43 @@ void IR_for_parking(){
     if(irrecv.decode(&results)){
         if (results.value == hexForIR_ElectricCar){
 
-
-        
-    for(int posDegrees = 0; posDegrees <= 90; posDegrees++) {
-        servo1.write(posDegrees);
-        delay(20);
-    }
-
             //Dersom ingen ledige plasser, si ifra til bil
             if(noSpotsAvailable){
-            ir.sendNEC(hexForIR_noParking, 32);
+                ir.sendNEC(hexForIR_noParking, 32);
             }
 
             //Ellers send ut en av plassene
             else{
+                for(int posDegrees = 0; posDegrees <= 90; posDegrees++) {
+                    servo1.write(posDegrees);
+                    delay(20);
+                }
                 for(int i = 0; i < spaceNumber; i++){
                     if(availabilityArray[i] == 1){
                         ir.sendNEC(hexForIR_Array[i], 32); 
-                        }  
-                    }
+                    }  
                 }
-            } 
-        }
-        else{
-            Serial.println("Access denied");
-        }
-        irrecv.resume();  // Receive the next value
+                delay(10000); //Venter til bilen har kjørt inn
+                for(int posDegrees = 90; posDegrees <= 0; posDegrees--) {
+                    servo1.write(posDegrees);
+                    delay(20);
+                }
 
-        long now = millis();
-        if(now - lastSentIR > IR_delay){
-            lastSentIR = now;
-            //esp_light_sleep_start();
+            }
+        } 
     }
+
+    else{
+        Serial.println("Access denied");
+        ir.sendNEC(hexForIR_noParking, 32);
+    }
+    irrecv.resume();  // Receive the next value
+
+    long now = millis();
+    if(now - lastSentIR > IR_delay){
+        lastSentIR = now;
+        //esp_light_sleep_start();
+}
 }
 
 //MAIN
