@@ -163,7 +163,37 @@ void doyouwanttobuy(){
 }
 
 void sendCharge(){
+  if(batteryCharge == 1){
+    irsend.sendNEC(hexForIR_howMuchGas1, 32); //Send til addresse og command.
+  }
+  
+  if(batteryCharge == 2){
+    irsend.sendNEC(hexForIR_howMuchGas2, 32);
+  }
+  
+  if(batteryCharge == 3){
+  irsend.sendNEC(hexForIR_howMuchGas3, 32);
+  }
 
+  if(batteryCharge == 4){
+  irsend.sendNEC(hexForIR_howMuchGas4, 32);
+  }
+
+  if(batteryCharge == 5){
+  irsend.sendNEC(hexForIR_howMuchGas5, 32);
+  }
+
+  if(batteryCharge == 6){
+  irsend.sendNEC(hexForIR_howMuchGas6, 32);
+  }
+
+  if(batteryCharge == 7){
+  irsend.sendNEC(hexForIR_howMuchGas7, 32);
+  }
+
+  if(batteryCharge == 8){
+  irsend.sendNEC(hexForIR_howMuchGas8, 32);
+  }
 
 }
 
