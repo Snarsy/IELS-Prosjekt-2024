@@ -9,7 +9,7 @@
 #include <esp_sleep.h>
 #include <IRrecv.h>
 
-IRsend irsend(IRPin);
+IRsend ir(IRPin);
 WiFiClient espClient;
 PubSubClient client(espClient);
 
@@ -68,7 +68,6 @@ const uint16_t IRRecievePin = 33; //ESP32 pin GPIO 33
 IRrecv irrecv(IRRecievePin);
 
 decode_results results;
-
 
 // MQTT & WiFi setup
 
@@ -206,6 +205,7 @@ void availabilityLEDs(){
 
 //IR
 
+
 void IR_for_parking(){
     /*if(now - lastSentIR > IR_delay){
         lastSentIR = now;
@@ -219,7 +219,8 @@ void IR_for_parking(){
         else{
             for(int i = 0; i < spaceNumber; i++){
                 if(availabilityArray[i] == 1){
-                    ir.sendNEC(hexForIR_Array[i], 32); 
+                    ir.sendNEC(hexForIR_Array[i], 32);
+                    delay(10); 
                 }
             }
         }
