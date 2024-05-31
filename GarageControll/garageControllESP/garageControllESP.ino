@@ -8,6 +8,7 @@
 #include <IRsend.h>
 #include <esp_sleep.h>
 #include <IRrecv.h>
+#include <Servo.h>
 
 
 IRsend ir(IRPin);
@@ -68,6 +69,10 @@ int hexForIR_Array[spaceNumber] = {hexForIR_parkingSpace1 ,hexForIR_parkingSpace
 
 long lastSentIR = 0;
 
+
+static const int servoPin = 4;
+
+Servo servo1;
 
 // MQTT & WiFi setup
 
@@ -228,6 +233,14 @@ void IR_for_parking(){
         }
     }*/
     if(irrecv.decode(&results)){
+<<<<<<< HEAD
+=======
+        
+    for(int posDegrees = 0; posDegrees <= 90; posDegrees++) {
+        servo1.write(posDegrees);
+        delay(20);
+    }
+>>>>>>> 378b2dd (Servo update)
 
         //Dersom ingen ledige plasser, si ifra til bil
         if(noSpotsAvailable){
@@ -251,7 +264,7 @@ void IR_for_parking(){
 
 void setup(){
     Serial.begin(9600);
-
+    servo1.attach(servoPin);
     pinMode(ledPin_1, OUTPUT);
     pinMode(ledPin_2, OUTPUT);
     pinMode(ledPin_3, OUTPUT);
