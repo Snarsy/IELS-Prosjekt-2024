@@ -4,16 +4,12 @@
 #include <IRremoteESP8266.h>
 #include <IRsend.h>
 
+
 IRsend irsend(IRPin);
-
-
-
 WiFiClient espClient;
 PubSubClient client(espClient);
 Adafruit_APDS9960 apds;
 
-
-const uint16_t IRPin = 32;  // ESP32 pin GPIO 32
 
 // MQTT-variabler
 
@@ -22,6 +18,9 @@ const char* password = "";
 const char* MQTT_UN = "fosfix";
 const char* MQTT_PW = "C4nn3ds0up3s321";
 const char* mqtt_server = "10.25.18.134";
+
+
+//IR-variabler
 
 const int hexForIR_howMuchGas1 = 0x11111111;
 const int hexForIR_howMuchGas2 = 0x11111112;
@@ -32,15 +31,15 @@ const int hexForIR_howMuchGas6 = 0x11122222;
 const int hexForIR_howMuchGas7 = 0x11222222;
 const int hexForIR_howMuchGas8 = 0x12222222;
 
-//Manni $$$$$$
+const uint16_t IRPin = 32;  // ESP32 pin GPIO 32
 
-int transactionCaseNumber = 0;
 
-//batterihelse
+//Batteri-variabler
 int batteryCharge = 50;
 int maxCharge = 50;
+int transactionCaseNumber = 0;
 
-// the setup function runs once when you press reset or power the board
+
 void setup() {
   
     Serial.begin(9600);
@@ -61,17 +60,22 @@ void setup() {
     client.setCallback(callback);
 }
 
-void receiveBatteryHealth(){
-//Finne ut hvordan vi skal gjøre dette
-}
 
 void batterygestures(){
-  //read a gesture from the device
+
   display.clear();
   display.gotoXY(5, 1);
   display.print("Ladeprosent");
   display.gotoXY(5, 4);
   display.print(batteryCharge);
+  display.gotoXY(1, 6);
+  display.print("Venstre")
+  display.gotoXY(1, 7);
+  display.print("Avbryt");
+  display.gotoXY(16, 6);
+  display.print("Høyre");
+  display.gotoXY(16, 7);
+  display.print("Kjøp");
 
   uint8_t gesture = apds.readGesture();
 
@@ -207,6 +211,7 @@ void reconnect() {
     }   
 }
 
+
 void callback(String topic, byte *message, unsigned int length)
 {
   String messageTemp;
@@ -234,18 +239,6 @@ void callback(String topic, byte *message, unsigned int length)
   }
 }
 
-
-// the loop function runs over and over again forever
-void loop() {
-
-  if (!client.connected()) {
-        reconnect();
-  }
-  client.loop();  
-  
-  transactionCase();
-}
-
 void transactionCase(){
   switch(transactionCaseNumber){
     case 0:
@@ -254,12 +247,12 @@ void transactionCase(){
     break;
 
     case 1:
-    //Cancel transaction?
+    //Avbryt
       doyouwanttocancel();
     break;
 
     case 2:
-    // Purchase transaction?
+    //Kjøp
       doyouwanttobuy();
     break;
 
@@ -267,4 +260,15 @@ void transactionCase(){
       sendCharge();
     break;
   }
+}
+
+
+void loop() {
+
+  if (!client.connected()) {
+        reconnect();
+  }
+  client.loop();  
+  
+  transactionCase();
 }

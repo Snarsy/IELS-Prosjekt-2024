@@ -4,14 +4,13 @@
 #include <ArduinoJson.h>
 #include <ArduinoJson.hpp>
 #include <EEPROM.h>
-#include <IRremote.h>
+#include <IRremoteESP8266.h>
+#include <IRsend.h>
+#include <esp_sleep.h>
 
-
+IRsend irsend(IRPin);
 WiFiClient espClient;
 PubSubClient client(espClient);
-IRsend ir;
-
-const int spaceNumber = 4;
 
 
 // MQTT-variabler
@@ -32,6 +31,8 @@ int previousNumberOfSpots = EEPROM.read(numberOfSpotsAdress);
 int availability_spot1 , availability_spot2, availability_spot3, availability_spot4 = 0;
 int availabilityArray[spaceNumber] = {availability_spot1, availability_spot2, availability_spot3, availability_spot4};
 
+const int spaceNumber = 4;
+
 long lastMsg = 0;
 
 bool noSpotsAvailable = false;
@@ -49,7 +50,7 @@ int ledPinArray[spaceNumber] = {ledPin_1, ledPin_2, ledPin_3, ledPin_4};
 
 // IR-variabler
 
-const int IRPIN = 35;
+const uint16_t IRPin = 32;  // ESP32 pin GPIO 32
 const int IR_delay = 3000;
 const int hexForIR_parkingSpace1 = 0x56874159;
 const int hexForIR_parkingSpace2 = 0x12345678;
@@ -60,6 +61,7 @@ const int hexForIR_noParking = 0x87654321;
 int hexForIR_Array[spaceNumber] = {hexForIR_parkingSpace1 ,hexForIR_parkingSpace2, hexForIR_parkingSpace3 ,hexForIR_parkingSpace4};
 
 long lastSentIR = 0;
+
 
 
 // MQTT & WiFi setup
@@ -198,7 +200,6 @@ void availabilityLEDs(){
 
 //IR
 
-
 void IR_for_parking(){
     long now = millis();
     if(now - lastSentIR > IR_delay){
@@ -220,7 +221,6 @@ void IR_for_parking(){
     }
 }
 
-
 //MAIN
 
 
@@ -238,7 +238,7 @@ void setup(){
     setup_wifi();
     client.setServer(mqtt_server, 1883);
 
-    ir.begin(IRPIN);
+    irsend.begin();
 }
 
 
