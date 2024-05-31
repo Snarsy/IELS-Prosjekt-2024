@@ -77,11 +77,6 @@ void physicalCheck_parking(){
     }
 }
 
-void parkingSpacesAvailable(){
-    
-}
-
-
 //Sender informasjon til ESP32 via I2C
 
 void updateParkingStatus(int Parkingspace){

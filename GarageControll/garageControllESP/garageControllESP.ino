@@ -52,13 +52,13 @@ int ledPinArray[spaceNumber] = {ledPin_1, ledPin_2, ledPin_3, ledPin_4};
 const uint16_t IRPin = 32;  // ESP32 pin GPIO 32
 const uint16_t IRRecievePin = 33; //ESP32 pin GPIO 33
 
-const int IR_delay = 20000;
+const int IR_delay = 10000;
 const int hexForIR_parkingSpace1 = 0x56874159;
 const int hexForIR_parkingSpace2 = 0x12345678;
 const int hexForIR_parkingSpace3 = 0x98765432;
 const int hexForIR_parkingSpace4 = 0xABCDEF01;
 const int hexForIR_noParking = 0x87654321;
-const int hexForIR_ElectricCar = 3292233855;
+int hexForIR_ElectricCar = 2155841655;
 
 int hexForIR_Array[spaceNumber] = {hexForIR_parkingSpace1 ,hexForIR_parkingSpace2, hexForIR_parkingSpace3 ,hexForIR_parkingSpace4};
 
@@ -129,7 +129,7 @@ void sendParkInfo(){
         char output[80];
 
         //Legger til variabler til JSON-dokumentet
-        doc["n"] = EEPROM.read(numberOfSpotsAdress);
+        doc["n"] = previousNumberOfSpots;
 
         serializeJson(doc, output); //Gjør om verdiene til noe som kan sendes
         Serial.println(output);
@@ -151,8 +151,8 @@ void receiveEvent(int howMany){
         availability = Wire.read();
     }
     Serial.print("parkingSpace: ");
-    Serial.println(parkingSpace);
-    Serial.print("Availability: ");
+    Serial.print(parkingSpace);
+    Serial.print(" : ");
     Serial.println(availability);
 }
 
@@ -172,7 +172,7 @@ void updateNumberOfSpots(){
 
     //Dersom antall ledige plasser endres, skriv ut til eeprom
     if(numberOfSpots != previousNumberOfSpots){
-        EEPROM.write(numberOfSpotsAdress,numberOfSpots);
+        previousNumberOfSpots = numberOfSpots;
     }
 
     //Dersom det ikke er noen ledige plasser
@@ -233,8 +233,10 @@ void IR_for_parking(){
         }
     }*/
     if(irrecv.decode(&results)){
-        if (results.value == hexForIR_ElectricCar){
-
+        Serial.println("Test");
+        Serial.println(results.value);
+        if (results.value == 2155841655){
+            Serial.println("ELBIL");
             //Dersom ingen ledige plasser, si ifra til bil
             if(noSpotsAvailable){
                 ir.sendNEC(hexForIR_noParking, 32);
@@ -242,6 +244,7 @@ void IR_for_parking(){
 
             //Ellers send ut en av plassene
             else{
+                Serial.println("Åpner");
                 for(int posDegrees = 0; posDegrees <= 90; posDegrees++) {
                     servo1.write(posDegrees);
                     delay(20);
@@ -249,9 +252,12 @@ void IR_for_parking(){
                 for(int i = 0; i < spaceNumber; i++){
                     if(availabilityArray[i] == 1){
                         ir.sendNEC(hexForIR_Array[i], 32); 
+                        Serial.print("Sender: ");
+                        Serial.println(i);
                     }  
                 }
                 delay(10000); //Venter til bilen har kjørt inn
+                Serial.println("Lukker!");
                 for(int posDegrees = 90; posDegrees <= 0; posDegrees--) {
                     servo1.write(posDegrees);
                     delay(20);
@@ -259,18 +265,18 @@ void IR_for_parking(){
 
             }
         } 
-    }
+        else{
+            Serial.println("Access denied");
+            ir.sendNEC(hexForIR_noParking, 32);
+        }
 
-    else{
-        Serial.println("Access denied");
-        ir.sendNEC(hexForIR_noParking, 32);
-    }
     irrecv.resume();  // Receive the next value
 
     long now = millis();
     if(now - lastSentIR > IR_delay){
         lastSentIR = now;
         //esp_light_sleep_start();
+    }
 }
 }
 
@@ -284,10 +290,10 @@ void setup(){
     pinMode(ledPin_2, OUTPUT);
     pinMode(ledPin_3, OUTPUT);
     pinMode(ledPin_4, OUTPUT);
-    pinMode(IRRecievePin, INPUT);
+    //pinMode(IRRecievePin, INPUT);
 
     Wire.begin(2);
-    Wire.onReceive(receiveEvent);
+    //Wire.onReceive(receiveEvent);
 
     setup_wifi();
     client.setServer(mqtt_server, 1883);
@@ -295,20 +301,21 @@ void setup(){
     irrecv.enableIRIn();
     ir.begin();
 
-    esp_sleep_enable_ext0_wakeup((gpio_num_t)IRRecievePin, 1);
+    //esp_sleep_enable_ext0_wakeup((gpio_num_t)IRRecievePin, 1);
 }
 
 
 void loop(){ 
-    delay(100);
-
+    
     if (!client.connected()) {
         reconnect();
     }
     client.loop();
-
+    /*
     availabilityLEDs();
     updateNumberOfSpots();
+    */
     IR_for_parking();
-    sendParkInfo();
+    //sendParkInfo();
+
 }

@@ -11,6 +11,7 @@ Zumo32U4IRPulses irSensors;
 Zumo32U4IMU imu;
 #include "TurnSensor.h"
 
+//For ir sender
 #include "Zumo32u4IRsender.h"
 #define DEVICE_ID 35
 Zumo32U4IRsender ZumoIrSender(DEVICE_ID, RIGHT_IR);
@@ -27,14 +28,20 @@ const int IRPin = A4;
 
 IRrecv IR(IRPin);
 
-//Alle verdiene vi bruker for kjøremønsteret
-
+//Variabler for kjøremonsteret
 int prevcase;
 int driveOverNum = 0;
 unsigned long prevmillis = 0;
 int caseNum = 1;
 int linelength = 300;
+
+//Variabler for gasStation 
 int chargePrevMillis;
+int howMuchGas = 1;
+
+//Variabler for garasjen
+int parkingAvailable = 0;//Har nummeret 10 fram til bilen får ledig plass.
+
 
 //Bompenger
 unsigned long BompreviousMillis = 0; // Store the last time the IR sensor was triggered
@@ -58,7 +65,6 @@ void driveOverLine(){
     }
 }
 
-int parkingAvailable = 0;//Har nummeret 10 fram til bilen får ledig plass.
 void irDecodeGarasje(){
     if(buttonC.isPressed()) parkingAvailable = 1; //Er til slik at det er mulig å teste garasjen uten diode. Fjerne ved endelig versjon.
     
@@ -73,7 +79,7 @@ void irDecodeGarasje(){
         IR.resume();
     }
 }
-int howMuchGas = 1;
+<<<<<<< Updated upstream
 //void irDecodeBensin(){
   //  if (IR.decode())
     //  Serial.println(IR.decodeIRData.decodedRawData);
@@ -93,6 +99,26 @@ int howMuchGas = 1;
 
 int destination = 3;
 int currentPosition = 2;
+=======
+int howMuchGas = 1;
+/*void irDecodeBensin(){
+    if (IR.decode()){
+        Serial.println(IR.decodeIRData.decodedRawData);
+        if (IR.decodedIRData.decodedRawData == 2290649224)     howMuchGas = 1; //10
+        if (IR.decodedIRData.decodedRawData == 1216907400)     howMuchGas = 2; //20
+        if (IR.decodedIRData.decodedRawData == 1149798536)     howMuchGas = 3; //30
+        if (IR.decodedIRData.decodedRawData == 1145604232)     howMuchGas = 4; //40
+        if (IR.decodedIRData.decodedRawData == 1145342088)     howMuchGas = 5; //50   
+        if (IR.decodedIRData.decodedRawData == 1145324680)     howMuchGas = 6; //60
+        if (IR.decodedIRData.decodedRawData == 1145324616)     howMuchGas = 7; //70
+        if (IR.decodedIRData.decodedRawData == 1145324612)     howMuchGas = 8; //80
+        IR.resume()   
+    }  
+}*/
+
+int destination = 2;
+int currentPosition = 1;
+>>>>>>> Stashed changes
 bool clockWise = 1;
 
 int caseNumGarage = 0;
@@ -191,6 +217,7 @@ void gasStation(){
         if(clockWise) turndeg(90);
         if(!clockWise) turndeg(-90);
         doDrive = 1;
+        haveturned = !haveturned;
     }
     if(doDrive == 1){
         driveLinePID();
@@ -206,6 +233,11 @@ void gasStation(){
         //irDecodeBensin();
         display.clear();
         display.gotoXY(0,0);
+        
+        if(howMuchGas == 0){
+            display.print("Ingen lading utført");
+        }
+
         if(howMuchGas == 1){
             display.print("Lading: +10%");
         }
