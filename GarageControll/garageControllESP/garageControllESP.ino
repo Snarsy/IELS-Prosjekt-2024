@@ -9,9 +9,12 @@
 #include <esp_sleep.h>
 #include <IRrecv.h>
 
+
 IRsend ir(IRPin);
 WiFiClient espClient;
 PubSubClient client(espClient);
+IRrecv irrecv(IRRecievePin);
+decode_results results;
 
 
 // MQTT-variabler
@@ -52,6 +55,8 @@ int ledPinArray[spaceNumber] = {ledPin_1, ledPin_2, ledPin_3, ledPin_4};
 // IR-sending variabler
 
 const uint16_t IRPin = 32;  // ESP32 pin GPIO 32
+const uint16_t IRRecievePin = 33; //ESP32 pin GPIO 33
+
 const int IR_delay = 3000;
 const int hexForIR_parkingSpace1 = 0x56874159;
 const int hexForIR_parkingSpace2 = 0x12345678;
@@ -63,11 +68,6 @@ int hexForIR_Array[spaceNumber] = {hexForIR_parkingSpace1 ,hexForIR_parkingSpace
 
 long lastSentIR = 0;
 
-// IR-Recieve variabler
-const uint16_t IRRecievePin = 33; //ESP32 pin GPIO 33
-IRrecv irrecv(IRRecievePin);
-
-decode_results results;
 
 // MQTT & WiFi setup
 
