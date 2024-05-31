@@ -172,6 +172,8 @@ void updateNumberOfSpots(){
     if(numberOfSpots == 0){
         noSpotsAvailable = true;
     }
+
+    esp_light_sleep_start();
 }
 
 
@@ -226,7 +228,7 @@ void IR_for_parking(){
         }
     }*/
     if(irrecv.decode(&results)){
-        Serial.println("Received");
+
         //Dersom ingen ledige plasser, si ifra til bil
         if(noSpotsAvailable){
             ir.sendNEC(hexForIR_noParking, 32);
@@ -254,6 +256,7 @@ void setup(){
     pinMode(ledPin_2, OUTPUT);
     pinMode(ledPin_3, OUTPUT);
     pinMode(ledPin_4, OUTPUT);
+    pinMode(IRRecievePin, INPUT);
 
     Wire.begin(2);
     Wire.onReceive(receiveEvent);
@@ -263,6 +266,8 @@ void setup(){
 
     irrecv.enableIRIn();
     ir.begin();
+
+    esp_sleep_enable_ext0_wakeup((gpio_num_t)IRRecievePin, 1);
 }
 
 
