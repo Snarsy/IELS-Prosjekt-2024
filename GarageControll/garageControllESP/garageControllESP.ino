@@ -11,12 +11,6 @@
 #include <Servo.h>
 
 
-IRsend ir(IRPin);
-WiFiClient espClient;
-PubSubClient client(espClient);
-IRrecv irrecv(IRRecievePin);
-decode_results results;
-
 
 // MQTT-variabler
 
@@ -31,12 +25,12 @@ const char* mqtt_server = "10.25.18.134";
 
 volatile int parkingSpace, availability = -1;
 
+const int spaceNumber = 4;
+
 int numberOfSpotsAdress = 1;
 int previousNumberOfSpots = EEPROM.read(numberOfSpotsAdress);
 int availability_spot1 , availability_spot2, availability_spot3, availability_spot4 = 0;
 int availabilityArray[spaceNumber] = {availability_spot1, availability_spot2, availability_spot3, availability_spot4};
-
-const int spaceNumber = 4;
 
 long lastMsg = 0;
 
@@ -58,7 +52,7 @@ int ledPinArray[spaceNumber] = {ledPin_1, ledPin_2, ledPin_3, ledPin_4};
 const uint16_t IRPin = 32;  // ESP32 pin GPIO 32
 const uint16_t IRRecievePin = 33; //ESP32 pin GPIO 33
 
-const int IR_delay = 3000;
+const int IR_delay = 20000;
 const int hexForIR_parkingSpace1 = 0x56874159;
 const int hexForIR_parkingSpace2 = 0x12345678;
 const int hexForIR_parkingSpace3 = 0x98765432;
@@ -69,10 +63,15 @@ int hexForIR_Array[spaceNumber] = {hexForIR_parkingSpace1 ,hexForIR_parkingSpace
 
 long lastSentIR = 0;
 
-
 static const int servoPin = 4;
 
+IRsend ir(IRPin);
+WiFiClient espClient;
+PubSubClient client(espClient);
+IRrecv irrecv(IRRecievePin);
+decode_results results;
 Servo servo1;
+
 
 // MQTT & WiFi setup
 
@@ -177,8 +176,6 @@ void updateNumberOfSpots(){
     if(numberOfSpots == 0){
         noSpotsAvailable = true;
     }
-
-    esp_light_sleep_start();
 }
 
 
@@ -234,12 +231,10 @@ void IR_for_parking(){
     }*/
     if(irrecv.decode(&results)){
 
-
-        
-    for(int posDegrees = 0; posDegrees <= 90; posDegrees++) {
-        servo1.write(posDegrees);
-        delay(20);
-    }
+        for(int posDegrees = 0; posDegrees <= 90; posDegrees++) {
+            servo1.write(posDegrees);
+            delay(20);
+        }
 
         //Dersom ingen ledige plasser, si ifra til bil
         if(noSpotsAvailable){
@@ -254,7 +249,14 @@ void IR_for_parking(){
                 }
             }
         }
+        
         irrecv.resume();  // Receive the next value
+
+        long now = millis();
+        if(now - lastSentIR > IR_delay){
+            lastSentIR = now;
+            //esp_light_sleep_start();
+        }
     }
 }
 
