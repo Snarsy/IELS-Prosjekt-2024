@@ -11,6 +11,10 @@ Zumo32U4IRPulses irSensors;
 Zumo32U4IMU imu;
 #include "TurnSensor.h"
 
+#include "Zumo32u4IRsender.h"
+#define DEVICE_ID 35
+Zumo32U4IRsender ZumoIrSender(DEVICE_ID, RIGHT_IR);
+
 #define PRINT_DEGUB_INFO 0 // Set to 1 to enable debug info
 
 #define SUBCARIER_PERIOD 420 // The default frequency is 16000000 / (420 + 1) = 38.005 kHz
@@ -27,7 +31,7 @@ IRrecv IR(IRPin);
 
 int prevcase;
 int driveOverNum = 0;
-int prevmillis = 0;
+unsigned long prevmillis = 0;
 int caseNum = 1;
 int linelength = 300;
 int chargePrevMillis;
@@ -82,8 +86,8 @@ int howMuchGas = 1;
     //}  
 //}
 
-int destination = 3;
-int currentPosition = 4;
+int destination = 2;
+int currentPosition = 3;
 bool clockWise = 0;
 
 int caseNumGarage = 0;
@@ -108,6 +112,10 @@ void garage(){
             motors.setSpeeds(0,0);
             linelength = 400;//Hvor mange millisekunder zumo'n skal kjøre over en linje
             irDecodeGarasje();
+            if(millis()-prevmillis>1000){
+                ZumoIrSender.send(1);
+                prevmillis = millis();
+            }
             if(parkingAvailable != 0){
                 caseNumGarage = 1;
             }

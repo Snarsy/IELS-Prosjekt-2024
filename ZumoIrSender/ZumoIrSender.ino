@@ -1,15 +1,13 @@
+// De nedenfor er til for å initialisere sendingen av ir signal. Dette lar oss ikke sende spesifikke IR signal, men et med koden FFFFFFFF
 #include "Zumo32u4IRsender.h"
+#define DEVICE_ID 35
+Zumo32U4IRsender ZumoIrSender(DEVICE_ID, RIGHT_IR);
 
-#define DEVICE_ID 0x01
-#define DIRECTION RIGHT_IR
-
-Zumo32U4IRsender ZumoIrSender(DEVICE_ID, DIRECTION);
-
-void setup() {
-  Serial.begin(9600);
+void setup(){
+    Serial.begin(115200);
+    delay(3000);
 }
-
 void loop() {
-  ZumoIrSender.send(0x11);
+  ZumoIrSender.send(1); //Sender C43B8877
   delay(1000);
 }
