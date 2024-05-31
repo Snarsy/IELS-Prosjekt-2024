@@ -29,7 +29,7 @@ int prevcase;
 int driveOverNum = 0;
 int prevmillis = 0;
 int caseNum = 1;
-int linelength = 200;
+int linelength = 300;
 int chargePrevMillis;
 
 void driveOverLine(){
@@ -82,25 +82,27 @@ int howMuchGas = 1;
     //}  
 //}
 
-int destination = 1;
-int currentPosition = 2;
+int destination = 3;
+int currentPosition = 4;
 bool clockWise = 0;
 
 int caseNumGarage = 0;
 int currentPosGarage = 0;
 bool doDrive = 0;
 int charged = 0;
+bool haveturned = 0;
 
 void garage(){
     followLinemaxSpeed = 200;
     switch (caseNumGarage){
         case 0://Denne casen får zumo'n til å kjøre over linjen for så å rotere utifra hvilken retning den kommer fra(clockwise). Deretter kjører den frem, stopper og venter på ir signal.
-            if(millis()-prevmillis<100){//Her må det være mindre enn samme verdi som 81.
-                if(clockWise){turndeg(-90);};
-                if(!clockWise){turndeg(90);};
+            if(!haveturned){//Her må det være mindre enn samme verdi som 81.
+                if(clockWise){turndeg(90);};
+                if(!clockWise){turndeg(-90);};
                 prevcase = caseNum;
                 caseNum = 0;
-                linelength = 500;// Lengden bilen kjører over må være samme tall som i linje 76. Dette er slik at den ikke kjører lengre enn den skal.
+                linelength = 50;// Lengden bilen kjører over må være samme tall som i linje 76. Dette er slik at den ikke kjører lengre enn den skal.
+                haveturned = !haveturned;
                 break;
             }
             motors.setSpeeds(0,0);
@@ -139,6 +141,7 @@ void garage(){
                 turndeg(90);
                 caseNum = 1;
                 currentPosition = 2;
+                haveturned = 0;
             }
             break;
         case 2:
@@ -167,14 +170,11 @@ void garage(){
             }
             break;
     }
-    display.clear();
-    display.println(caseNumGarage);
-    display.print(currentPosGarage);
 }
 
 void gasStation(){
     followLinemaxSpeed = 200;
-    if(millis()-prevmillis<50){//Her må det være mindre enn samme verdi som 81.
+    if(!haveturned){//Her må det være mindre enn samme verdi som 81.
         if(clockWise) turndeg(90);
         if(!clockWise) turndeg(-90);
         doDrive = 1;
@@ -247,6 +247,46 @@ void gasStation(){
     }
 }
 
+int nabocounter = 0;
+int husnummer = 2;
+
+void nabolag(){
+    if(!haveturned){
+        if(clockWise) turndeg(90);
+        if(!clockWise) turndeg(-90);
+        haveturned = !haveturned;
+        doDrive = 1;
+    }
+    if(doDrive == 1){
+        driveLinePID();
+    }
+    if(nabocounter == husnummer || nabocounter == (husnummer+4)){
+        if(clockWise) turndeg(90);
+        if(!clockWise) turndeg(-90);
+        nabocounter = nabocounter + 1;
+    }
+    if(aboveLeft() || aboveRight()){
+        nabocounter = nabocounter + 1;
+        prevcase = caseNum;
+        caseNum = 0;
+    }
+    if(nabocounter == (husnummer+2)){
+        turndeg(170);
+        nabocounter = nabocounter + 1;
+        doDrive = 0;
+        prevmillis = millis();
+    }
+    if((millis()-prevmillis)>=5000){
+        doDrive = 1;
+    }
+    if(nabocounter == 8){
+        if(clockWise) turndeg(90);
+        if(!clockWise) turndeg(-90);
+        caseNum = 1;
+        nabocounter = 0;
+    }
+}
+
 void driving(){
     switch (caseNum){           //Hovedcase for bilkjøringen. Kan evt legges inn i en void hvis dette ser bedre ut.
             case 0:                 //driveoverline vil kjøre over en linje og returnere til det den gjorde før. Dette gjør at man kan kjøre over kryss og fortsette videre i koden. Husk prevcase = casenum før man setter casenum = 0.
@@ -273,6 +313,9 @@ void driving(){
                     else if(destination == 2){
                         caseNum = 3;
                     }
+                    else if(destination == 3){
+                        caseNum = 4;
+                    }
                 }
                 break;
             case 2:
@@ -280,6 +323,9 @@ void driving(){
                 break;
             case 3:
                 gasStation();
+                break;
+            case 4:
+                nabolag();
                 break;
         }
 }    
@@ -294,7 +340,6 @@ void setup(){
 
 void loop(){
     driving();
-    tollGate();
 }
 
 void tollGate(){ //Tar imot bompenger, denne må være bare om det er dieselbil

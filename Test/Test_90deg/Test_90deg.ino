@@ -22,6 +22,22 @@ Zumo32U4IMU imu;
 const int IRPin = A4;
 
 IRrecv IR(IRPin);
+unsigned long prevmillis;
+bool verdi = 1;
+void beveggrader(bool side){
+    while(verdi){
+        if(side){
+            motors.setSpeeds(100,-100);
+        }
+        else if(!side){
+            motors.setSpeeds(-100,100);
+        }
+        if(!aboveLine(0) && !aboveLine(4) && aboveLine(2) && aboveLine(3) && millis()-prevmillis>100){
+            motors.setSpeeds(0,0);
+            verdi = 0;
+        }
+    }
+}
 
 void setup(){
     lineSensors.initFiveSensors();
@@ -31,6 +47,6 @@ void setup(){
 void loop(){
     driveLinePID();
     if(aboveAll()){
-        turndeg(90);
+        turndeg(-90);
     }
 }
