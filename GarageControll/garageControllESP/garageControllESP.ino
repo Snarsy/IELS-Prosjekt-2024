@@ -7,6 +7,7 @@
 #include <IRremoteESP8266.h>
 #include <IRsend.h>
 #include <esp_sleep.h>
+#include <IRrecv.h>
 
 IRsend irsend(IRPin);
 WiFiClient espClient;
@@ -48,7 +49,7 @@ const int ledPin_4 = 27;
 int ledPinArray[spaceNumber] = {ledPin_1, ledPin_2, ledPin_3, ledPin_4};
 
 
-// IR-variabler
+// IR-sending variabler
 
 const uint16_t IRPin = 32;  // ESP32 pin GPIO 32
 const int IR_delay = 3000;
@@ -62,6 +63,11 @@ int hexForIR_Array[spaceNumber] = {hexForIR_parkingSpace1 ,hexForIR_parkingSpace
 
 long lastSentIR = 0;
 
+// IR-Recieve variabler
+const uint16_t IRRecievePin = 33; //ESP32 pin GPIO 33
+IRrecv irrecv(IRRecievePin);
+
+decode_results results;
 
 
 // MQTT & WiFi setup
@@ -201,9 +207,24 @@ void availabilityLEDs(){
 //IR
 
 void IR_for_parking(){
-    long now = millis();
-    if(now - lastSentIR > IR_delay){
+    /*if(now - lastSentIR > IR_delay){
         lastSentIR = now;
+
+        //Dersom ingen ledige plasser, si ifra til bil
+        if(noSpotsAvailable){
+            ir.sendNEC(hexForIR_noParking, 32);
+        }
+
+        //Ellers send ut en av plassene
+        else{
+            for(int i = 0; i < spaceNumber; i++){
+                if(availabilityArray[i] == 1){
+                    ir.sendNEC(hexForIR_Array[i], 32); 
+                }
+            }
+        }
+    }*/
+    if(irrecv.decode(&results)){
 
         //Dersom ingen ledige plasser, si ifra til bil
         if(noSpotsAvailable){
@@ -237,6 +258,8 @@ void setup(){
 
     setup_wifi();
     client.setServer(mqtt_server, 1883);
+
+    irrecv.enableIRIn();
 
     irsend.begin();
 }
