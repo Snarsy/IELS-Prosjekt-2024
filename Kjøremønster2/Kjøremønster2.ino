@@ -79,28 +79,7 @@ void irDecodeGarasje(){
         IR.resume();
     }
 }
-<<<<<<< Updated upstream
-//void irDecodeBensin(){
-  //  if (IR.decode())
-    //  Serial.println(IR.decodeIRData.decodedRawData);
-      //  if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 1; //10
-        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 2; //20
-        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 3; //30
-        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 4; //40
-        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 5; //50   
-        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 6; //60
-        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 7; //70
-        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 8; //80
-        ////if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 9; //90
-        ////if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 10; //100
-        
-    //}  
-//}
-
-int destination = 3;
-int currentPosition = 2;
-=======
-int howMuchGas = 1;
+//int howMuchGas = 1;
 /*void irDecodeBensin(){
     if (IR.decode()){
         Serial.println(IR.decodeIRData.decodedRawData);
@@ -118,7 +97,6 @@ int howMuchGas = 1;
 
 int destination = 2;
 int currentPosition = 1;
->>>>>>> Stashed changes
 bool clockWise = 1;
 
 int caseNumGarage = 0;
@@ -224,62 +202,74 @@ void gasStation(){
     }
     
     //irDecodeBensin();   //trenger ikke denne?
-    chargePrevMillis = millis();
+    //chargePrevMillis = millis();
     if (aboveAll() && charged != 1){
         motors.setSpeeds(0,0);
         doDrive = 0;
         if(clockWise) turndeg(90);
         if(!clockWise) turndeg(-90);
+        chargePrevMillis = millis();
         //irDecodeBensin();
         display.clear();
         display.gotoXY(0,0);
         
         if(howMuchGas == 0){
-            display.print("Ingen lading utført");
+            display.gotoXY(3,3);
+            display.print("Lading avbrutt");
         }
 
         if(howMuchGas == 1){
+            display.gotoXY(3,3);
             display.print("Lading: +10%");
         }
 
         if(howMuchGas == 2){
+            display.gotoXY(3,3);
             display.print("Lading: +20%");
         }
 
         if(howMuchGas == 3){
+            display.gotoXY(3,3);
             display.print("Lading: +30%");
         }
 
         if(howMuchGas == 4){
+            display.gotoXY(3,3);
             display.print("Lading: +40%");
         }
 
         if(howMuchGas == 5){
+            display.gotoXY(3,3);
             display.print("Lading: +50%");
         }
 
         if(howMuchGas == 6){
+            display.gotoXY(3,3);
             display.print("Lading: +60%");
         }
 
         if(howMuchGas == 7){
+            display.gotoXY(3,3);
             display.print("Lading: +70%");
         }
 
         if(howMuchGas == 8){
+            display.gotoXY(3,3);
             display.print("Lading: +80%");
         }
-        
-        if (millis() - chargePrevMillis > 3000){
-            display.clear();
-            prevcase = caseNum;
-            caseNum = 0;
-            charged = 1;
-            if(clockWise) turndeg(-90);
-            if(!clockWise) turndeg(90);
-            doDrive = 1;
-        }
+    }  
+    if ((millis() - chargePrevMillis) > 3000 && (millis() - chargePrevMillis) < 3100){
+        display.clear();
+        if(clockWise) turndeg(-90);
+        if(!clockWise) turndeg(90);
+        prevcase = caseNum;
+        caseNum = 0;
+        charged = 1;
+            //if(clockWise) turndeg(-90);
+            //if(!clockWise) turndeg(90);
+        doDrive = 1;
     }
+    
 
 
 
@@ -381,6 +371,7 @@ void setup(){
     lineSensors.initFiveSensors();
     Serial.begin(115200);
     turnSensorSetup();
+    display.setLayout21x8();
 }
 
 void loop(){
