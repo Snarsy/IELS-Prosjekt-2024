@@ -8,6 +8,6 @@ void setup(){
     delay(3000);
 }
 void loop() {
-  ZumoIrSender.send(1); //Sender C43B8877
+  ZumoIrSender.send(1); //Sender 3292233855
   delay(1000);
 }

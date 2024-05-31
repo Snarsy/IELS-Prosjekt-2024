@@ -36,6 +36,11 @@ int caseNum = 1;
 int linelength = 300;
 int chargePrevMillis;
 
+//Bompenger
+unsigned long BompreviousMillis = 0; // Store the last time the IR sensor was triggered
+const long Bominterval = 10000; // 10 seconds interval
+
+
 void driveOverLine(){
     switch (driveOverNum){
         case 0:
@@ -348,22 +353,20 @@ void setup(){
 
 void loop(){
     driving();
+    tollGate();
 }
 
 void tollGate(){ //Tar imot bompenger, denne må være bare om det er dieselbil
+    unsigned long currentMillis = millis(); 
+    
     if (IR.decode()){
         if (IR.decodedIRData.decodedRawData == 1217527807){
-            //Spille G4
-            buzzer.playFrequency(392, 250, 15);
-            delay(250); 
+            if (BompreviousMillis == 0 || currentMillis - BompreviousMillis >= Bominterval) {
+                BompreviousMillis = currentMillis;
 
-            // Spille D5 (587 Hz)
-            buzzer.playFrequency(587, 250, 15); 
-            delay(250); 
-
-            // Spille G5 (784 Hz)
-            buzzer.playFrequency(784, 250, 15);
-            delay(250); 
+                //Spiller G4
+                buzzer.playFrequency(392, 250, 15);
+            }
         }
     }
 }
