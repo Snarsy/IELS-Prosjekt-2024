@@ -86,9 +86,9 @@ int howMuchGas = 1;
     //}  
 //}
 
-int destination = 2;
-int currentPosition = 3;
-bool clockWise = 0;
+int destination = 3;
+int currentPosition = 2;
+bool clockWise = 1;
 
 int caseNumGarage = 0;
 int currentPosGarage = 0;
@@ -101,8 +101,8 @@ void garage(){
     switch (caseNumGarage){
         case 0://Denne casen får zumo'n til å kjøre over linjen for så å rotere utifra hvilken retning den kommer fra(clockwise). Deretter kjører den frem, stopper og venter på ir signal.
             if(!haveturned){//Her må det være mindre enn samme verdi som 81.
-                if(clockWise){turndeg(90);};
-                if(!clockWise){turndeg(-90);};
+                if(clockWise){turndeg(-90);};
+                if(!clockWise){turndeg(90);};
                 prevcase = caseNum;
                 caseNum = 0;
                 linelength = 50;// Lengden bilen kjører over må være samme tall som i linje 76. Dette er slik at den ikke kjører lengre enn den skal.
