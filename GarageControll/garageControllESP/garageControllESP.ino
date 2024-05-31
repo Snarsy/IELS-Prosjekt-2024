@@ -8,7 +8,7 @@
 #include <IRsend.h>
 #include <esp_sleep.h>
 
-IRsend irsend(IRPin);
+IRsend ir(IRPin);
 WiFiClient espClient;
 PubSubClient client(espClient);
 
@@ -61,7 +61,6 @@ const int hexForIR_noParking = 0x87654321;
 int hexForIR_Array[spaceNumber] = {hexForIR_parkingSpace1 ,hexForIR_parkingSpace2, hexForIR_parkingSpace3 ,hexForIR_parkingSpace4};
 
 long lastSentIR = 0;
-
 
 
 // MQTT & WiFi setup
@@ -200,6 +199,7 @@ void availabilityLEDs(){
 
 //IR
 
+
 void IR_for_parking(){
     long now = millis();
     if(now - lastSentIR > IR_delay){
@@ -214,7 +214,8 @@ void IR_for_parking(){
         else{
             for(int i = 0; i < spaceNumber; i++){
                 if(availabilityArray[i] == 1){
-                    ir.sendNEC(hexForIR_Array[i], 32); 
+                    ir.sendNEC(hexForIR_Array[i], 32);
+                    delay(10); 
                 }
             }
         }
