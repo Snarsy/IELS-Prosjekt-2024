@@ -231,6 +231,7 @@ void IR_for_parking(){
         }
     }*/
     if(irrecv.decode(&results)){
+        if (results.value == 3292233855){
 
 
         
@@ -253,18 +254,16 @@ void IR_for_parking(){
                     }
                 }
             } 
-        else
-        {
-            Serial.print("Access denied");
         }
-        
+        else{
+            Serial.println("Access denied");
+        }
         irrecv.resume();  // Receive the next value
 
         long now = millis();
         if(now - lastSentIR > IR_delay){
             lastSentIR = now;
             //esp_light_sleep_start();
-        }
     }
 }
 
