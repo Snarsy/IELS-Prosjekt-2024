@@ -174,6 +174,7 @@ uint16_t readSensors()
 
 bool aboveLine(uint8_t sensorIndex)
 {
+    readSensors();
   return lineSensorValues[sensorIndex] > sensorThreshold;
 }
 
