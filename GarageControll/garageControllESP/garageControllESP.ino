@@ -231,7 +231,7 @@ void IR_for_parking(){
         }
     }*/
     if(irrecv.decode(&results)){
-        if (results.value == 3292233855){
+        if (results.value == hexForIR_ElectricCar){
 
 
         
