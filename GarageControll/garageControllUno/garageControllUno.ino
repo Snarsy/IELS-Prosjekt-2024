@@ -1,5 +1,7 @@
 #include <Wire.h>
+#include <IRremote.h>
 
+IRsend ir;
 
 //Sendepins til distansemåler
 
@@ -75,6 +77,10 @@ void physicalCheck_parking(){
     }
 }
 
+void parkingSpacesAvailable(){
+    
+}
+
 
 //Sender informasjon til ESP32 via I2C
 
@@ -84,6 +90,7 @@ void updateParkingStatus(int Parkingspace){
     Wire.write(parkingStatusArray[Parkingspace]);
     Wire.endTransmission();
 }
+
 
 void setup(){
     Serial.begin(9600);

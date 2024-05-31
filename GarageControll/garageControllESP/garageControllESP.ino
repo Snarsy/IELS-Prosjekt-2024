@@ -4,14 +4,18 @@
 #include <ArduinoJson.h>
 #include <ArduinoJson.hpp>
 #include <EEPROM.h>
-#include <IRremote.h>
+#include <IRremoteESP8266.h>
+#include <IRsend.h>
+#include <esp_sleep.h>
+#include <IRrecv.h>
+#include <Servo.h>
 
 
+IRsend ir(IRPin);
 WiFiClient espClient;
 PubSubClient client(espClient);
-IRsend ir;
-
-const int spaceNumber = 4;
+IRrecv irrecv(IRRecievePin);
+decode_results results;
 
 
 // MQTT-variabler
@@ -32,6 +36,8 @@ int previousNumberOfSpots = EEPROM.read(numberOfSpotsAdress);
 int availability_spot1 , availability_spot2, availability_spot3, availability_spot4 = 0;
 int availabilityArray[spaceNumber] = {availability_spot1, availability_spot2, availability_spot3, availability_spot4};
 
+const int spaceNumber = 4;
+
 long lastMsg = 0;
 
 bool noSpotsAvailable = false;
@@ -47,9 +53,11 @@ const int ledPin_4 = 27;
 int ledPinArray[spaceNumber] = {ledPin_1, ledPin_2, ledPin_3, ledPin_4};
 
 
-// IR-variabler
+// IR-sending variabler
 
-const int IRPIN = 35;
+const uint16_t IRPin = 32;  // ESP32 pin GPIO 32
+const uint16_t IRRecievePin = 33; //ESP32 pin GPIO 33
+
 const int IR_delay = 3000;
 const int hexForIR_parkingSpace1 = 0x56874159;
 const int hexForIR_parkingSpace2 = 0x12345678;
@@ -61,6 +69,10 @@ int hexForIR_Array[spaceNumber] = {hexForIR_parkingSpace1 ,hexForIR_parkingSpace
 
 long lastSentIR = 0;
 
+
+static const int servoPin = 4;
+
+Servo servo1;
 
 // MQTT & WiFi setup
 
@@ -165,6 +177,8 @@ void updateNumberOfSpots(){
     if(numberOfSpots == 0){
         noSpotsAvailable = true;
     }
+
+    esp_light_sleep_start();
 }
 
 
@@ -200,9 +214,32 @@ void availabilityLEDs(){
 
 
 void IR_for_parking(){
-    long now = millis();
-    if(now - lastSentIR > IR_delay){
+    /*if(now - lastSentIR > IR_delay){
         lastSentIR = now;
+
+        //Dersom ingen ledige plasser, si ifra til bil
+        if(noSpotsAvailable){
+            ir.sendNEC(hexForIR_noParking, 32);
+        }
+
+        //Ellers send ut en av plassene
+        else{
+            for(int i = 0; i < spaceNumber; i++){
+                if(availabilityArray[i] == 1){
+                    ir.sendNEC(hexForIR_Array[i], 32);
+                    delay(10); 
+                }
+            }
+        }
+    }*/
+    if(irrecv.decode(&results)){
+
+
+        
+    for(int posDegrees = 0; posDegrees <= 90; posDegrees++) {
+        servo1.write(posDegrees);
+        delay(20);
+    }
 
         //Dersom ingen ledige plasser, si ifra til bil
         if(noSpotsAvailable){
@@ -217,20 +254,21 @@ void IR_for_parking(){
                 }
             }
         }
+        irrecv.resume();  // Receive the next value
     }
 }
-
 
 //MAIN
 
 
 void setup(){
     Serial.begin(9600);
-
+    servo1.attach(servoPin);
     pinMode(ledPin_1, OUTPUT);
     pinMode(ledPin_2, OUTPUT);
     pinMode(ledPin_3, OUTPUT);
     pinMode(ledPin_4, OUTPUT);
+    pinMode(IRRecievePin, INPUT);
 
     Wire.begin(2);
     Wire.onReceive(receiveEvent);
@@ -238,7 +276,10 @@ void setup(){
     setup_wifi();
     client.setServer(mqtt_server, 1883);
 
-    ir.begin(IRPIN);
+    irrecv.enableIRIn();
+    ir.begin();
+
+    esp_sleep_enable_ext0_wakeup((gpio_num_t)IRRecievePin, 1);
 }
 
 
