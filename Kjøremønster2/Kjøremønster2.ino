@@ -29,7 +29,7 @@ int prevcase;
 int driveOverNum = 0;
 int prevmillis = 0;
 int caseNum = 1;
-int linelength = 200;
+int linelength = 300;
 int chargePrevMillis;
 
 void driveOverLine(){
@@ -82,8 +82,8 @@ int howMuchGas = 1;
     //}  
 //}
 
-int destination = 1;
-int currentPosition = 3;
+int destination = 3;
+int currentPosition = 4;
 bool clockWise = 0;
 
 int caseNumGarage = 0;
@@ -247,13 +247,44 @@ void gasStation(){
     }
 }
 
+int nabocounter = 0;
+int husnummer = 2;
 
 void nabolag(){
     if(!haveturned){
         if(clockWise) turndeg(90);
         if(!clockWise) turndeg(-90);
+        haveturned = !haveturned;
+        doDrive = 1;
     }
-
+    if(doDrive == 1){
+        driveLinePID();
+    }
+    if(nabocounter == husnummer || nabocounter == (husnummer+4)){
+        if(clockWise) turndeg(90);
+        if(!clockWise) turndeg(-90);
+        nabocounter = nabocounter + 1;
+    }
+    if(aboveLeft() || aboveRight()){
+        nabocounter = nabocounter + 1;
+        prevcase = caseNum;
+        caseNum = 0;
+    }
+    if(nabocounter == (husnummer+2)){
+        turndeg(170);
+        nabocounter = nabocounter + 1;
+        doDrive = 0;
+        prevmillis = millis();
+    }
+    if((millis()-prevmillis)>=5000){
+        doDrive = 1;
+    }
+    if(nabocounter == 8){
+        if(clockWise) turndeg(90);
+        if(!clockWise) turndeg(-90);
+        caseNum = 1;
+        nabocounter = 0;
+    }
 }
 
 void driving(){
@@ -282,6 +313,9 @@ void driving(){
                     else if(destination == 2){
                         caseNum = 3;
                     }
+                    else if(destination == 3){
+                        caseNum = 4;
+                    }
                 }
                 break;
             case 2:
@@ -289,6 +323,9 @@ void driving(){
                 break;
             case 3:
                 gasStation();
+                break;
+            case 4:
+                nabolag();
                 break;
         }
 }    
