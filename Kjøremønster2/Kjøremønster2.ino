@@ -74,6 +74,7 @@ void irDecodeGarasje(){
         IR.resume();
     }
 }
+<<<<<<< Updated upstream
 //void irDecodeBensin(){
   //  if (IR.decode())
     //  Serial.println(IR.decodeIRData.decodedRawData);
@@ -93,6 +94,26 @@ void irDecodeGarasje(){
 
 int destination = 3;
 int currentPosition = 2;
+=======
+int howMuchGas = 1;
+/*void irDecodeBensin(){
+    if (IR.decode()){
+        Serial.println(IR.decodeIRData.decodedRawData);
+        if (IR.decodedIRData.decodedRawData == 2290649224)     howMuchGas = 1; //10
+        if (IR.decodedIRData.decodedRawData == 1216907400)     howMuchGas = 2; //20
+        if (IR.decodedIRData.decodedRawData == 1149798536)     howMuchGas = 3; //30
+        if (IR.decodedIRData.decodedRawData == 1145604232)     howMuchGas = 4; //40
+        if (IR.decodedIRData.decodedRawData == 1145342088)     howMuchGas = 5; //50   
+        if (IR.decodedIRData.decodedRawData == 1145324680)     howMuchGas = 6; //60
+        if (IR.decodedIRData.decodedRawData == 1145324616)     howMuchGas = 7; //70
+        if (IR.decodedIRData.decodedRawData == 1145324612)     howMuchGas = 8; //80
+        IR.resume()   
+    }  
+}*/
+
+int destination = 2;
+int currentPosition = 1;
+>>>>>>> Stashed changes
 bool clockWise = 1;
 
 int caseNumGarage = 0;
@@ -207,6 +228,11 @@ void gasStation(){
         //irDecodeBensin();
         display.clear();
         display.gotoXY(0,0);
+        
+        if(howMuchGas == 0){
+            display.print("Ingen lading utført");
+        }
+
         if(howMuchGas == 1){
             display.print("Lading: +10%");
         }

@@ -21,15 +21,15 @@ const char* mqtt_server = "10.25.18.134";
 
 
 //IR-variabler
-
-const int hexForIR_howMuchGas1 = 0x11111111;
-const int hexForIR_howMuchGas2 = 0x11111112;
-const int hexForIR_howMuchGas3 = 0x11111122;
-const int hexForIR_howMuchGas4 = 0x11111222;
-const int hexForIR_howMuchGas5 = 0x11112222;
-const int hexForIR_howMuchGas6 = 0x11122222;
-const int hexForIR_howMuchGas7 = 0x11222222;
-const int hexForIR_howMuchGas8 = 0x12222222;
+const int hexForIR_howMuchGas0 = 0x11111111;
+const int hexForIR_howMuchGas1 = 0x11111112;
+const int hexForIR_howMuchGas2 = 0x11111122;
+const int hexForIR_howMuchGas3 = 0x11111222;
+const int hexForIR_howMuchGas4 = 0x11112222;
+const int hexForIR_howMuchGas5 = 0x11122222;
+const int hexForIR_howMuchGas6 = 0x11222222;
+const int hexForIR_howMuchGas7 = 0x12222222;
+const int hexForIR_howMuchGas8 = 0x22222222;
 
 const uint16_t IRPin = 32;  // ESP32 pin GPIO 32
 
@@ -163,38 +163,41 @@ void doyouwanttobuy(){
 }
 
 void sendCharge(){
-  if(batteryCharge == 1){
+  if(batteryCharge == 0){
+    irsend.sendNec(hexForIR_howMuchGas0, 32);
+  }
+  
+  if(batteryCharge == 10){
     irsend.sendNEC(hexForIR_howMuchGas1, 32); //Send til addresse og command.
   }
   
-  if(batteryCharge == 2){
+  if(batteryCharge == 20){
     irsend.sendNEC(hexForIR_howMuchGas2, 32);
   }
   
-  if(batteryCharge == 3){
-  irsend.sendNEC(hexForIR_howMuchGas3, 32);
+  if(batteryCharge == 30){
+    irsend.sendNEC(hexForIR_howMuchGas3, 32);
   }
 
-  if(batteryCharge == 4){
-  irsend.sendNEC(hexForIR_howMuchGas4, 32);
+  if(batteryCharge == 40){
+    irsend.sendNEC(hexForIR_howMuchGas4, 32);
   }
 
-  if(batteryCharge == 5){
-  irsend.sendNEC(hexForIR_howMuchGas5, 32);
+  if(batteryCharge == 50){
+    irsend.sendNEC(hexForIR_howMuchGas5, 32);
   }
 
-  if(batteryCharge == 6){
-  irsend.sendNEC(hexForIR_howMuchGas6, 32);
+  if(batteryCharge == 60){
+    irsend.sendNEC(hexForIR_howMuchGas6, 32);
   }
 
-  if(batteryCharge == 7){
-  irsend.sendNEC(hexForIR_howMuchGas7, 32);
+  if(batteryCharge == 70){
+    irsend.sendNEC(hexForIR_howMuchGas7, 32);
   }
 
-  if(batteryCharge == 8){
-  irsend.sendNEC(hexForIR_howMuchGas8, 32);
+  if(batteryCharge == 80){
+    irsend.sendNEC(hexForIR_howMuchGas8, 32);
   }
-
 }
 
 
