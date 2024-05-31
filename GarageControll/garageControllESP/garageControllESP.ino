@@ -226,7 +226,7 @@ void IR_for_parking(){
         }
     }*/
     if(irrecv.decode(&results)){
-
+        Serial.println("Received");
         //Dersom ingen ledige plasser, si ifra til bil
         if(noSpotsAvailable){
             ir.sendNEC(hexForIR_noParking, 32);
@@ -240,6 +240,7 @@ void IR_for_parking(){
                 }
             }
         }
+        irrecv.resume();  // Receive the next value
     }
 }
 
