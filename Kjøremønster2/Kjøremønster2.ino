@@ -11,6 +11,7 @@ Zumo32U4IRPulses irSensors;
 Zumo32U4IMU imu;
 #include "TurnSensor.h"
 
+//For ir sender
 #include "Zumo32u4IRsender.h"
 #define DEVICE_ID 35
 Zumo32U4IRsender ZumoIrSender(DEVICE_ID, RIGHT_IR);
@@ -27,14 +28,20 @@ const int IRPin = A4;
 
 IRrecv IR(IRPin);
 
-//Alle verdiene vi bruker for kjøremønsteret
-
+//Variabler for kjøremonsteret
 int prevcase;
 int driveOverNum = 0;
 unsigned long prevmillis = 0;
 int caseNum = 1;
 int linelength = 300;
+
+//Variabler for gasStation 
 int chargePrevMillis;
+int howMuchGas = 1;
+
+//Variabler for garasjen
+int parkingAvailable = 0;//Har nummeret 10 fram til bilen får ledig plass.
+
 
 void driveOverLine(){
     switch (driveOverNum){
@@ -53,7 +60,6 @@ void driveOverLine(){
     }
 }
 
-int parkingAvailable = 0;//Har nummeret 10 fram til bilen får ledig plass.
 void irDecodeGarasje(){
     if(buttonC.isPressed()) parkingAvailable = 1; //Er til slik at det er mulig å teste garasjen uten diode. Fjerne ved endelig versjon.
     
@@ -68,7 +74,6 @@ void irDecodeGarasje(){
         IR.resume();
     }
 }
-int howMuchGas = 1;
 //void irDecodeBensin(){
   //  if (IR.decode())
     //  Serial.println(IR.decodeIRData.decodedRawData);
@@ -186,6 +191,7 @@ void gasStation(){
         if(clockWise) turndeg(90);
         if(!clockWise) turndeg(-90);
         doDrive = 1;
+        haveturned = !haveturned;
     }
     if(doDrive == 1){
         driveLinePID();
