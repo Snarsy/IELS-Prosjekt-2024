@@ -261,8 +261,7 @@ void setup(){
     client.setServer(mqtt_server, 1883);
 
     irrecv.enableIRIn();
-
-    irsend.begin();
+    ir.begin();
 }
 
 
