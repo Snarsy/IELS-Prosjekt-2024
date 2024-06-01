@@ -79,25 +79,26 @@ void irDecodeGarasje(){
         IR.resume();
     }
 }
-//int howMuchGas = 1;
-/*void irDecodeBensin(){
-    if (IR.decode()){
-        Serial.println(IR.decodeIRData.decodedRawData);
-        if (IR.decodedIRData.decodedRawData == 2290649224)     howMuchGas = 1; //10
-        if (IR.decodedIRData.decodedRawData == 1216907400)     howMuchGas = 2; //20
-        if (IR.decodedIRData.decodedRawData == 1149798536)     howMuchGas = 3; //30
-        if (IR.decodedIRData.decodedRawData == 1145604232)     howMuchGas = 4; //40
-        if (IR.decodedIRData.decodedRawData == 1145342088)     howMuchGas = 5; //50   
-        if (IR.decodedIRData.decodedRawData == 1145324680)     howMuchGas = 6; //60
-        if (IR.decodedIRData.decodedRawData == 1145324616)     howMuchGas = 7; //70
-        if (IR.decodedIRData.decodedRawData == 1145324612)     howMuchGas = 8; //80
-        IR.resume()   
-    }  
-}*/
+//void irDecodeBensin(){
+  //  if (IR.decode())
+    //  Serial.println(IR.decodeIRData.decodedRawData);
+      //  if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 1; //10
+        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 2; //20
+        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 3; //30
+        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 4; //40
+        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 5; //50   
+        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 6; //60
+        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 7; //70
+        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 8; //80
+        ////if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 9; //90
+        ////if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 10; //100
+        
+    //}  
+//}
 
-int destination = 2;
-int currentPosition = 1;
-bool clockWise = 1;
+int destination = 3;
+int currentPosition = 2;
+int howMuchGas = 1;
 
 int caseNumGarage = 0;
 int currentPosGarage = 0;
