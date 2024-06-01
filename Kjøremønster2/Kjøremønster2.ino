@@ -17,6 +17,7 @@ Zumo32U4IMU imu;
 Zumo32U4IRsender ZumoIrSender(DEVICE_ID, RIGHT_IR);
 
 //Ir Receive
+#define PRINT_DEGUB_INFO 0
 #define SUBCARIER_PERIOD 420 // The default frequency is 16000000 / (420 + 1) = 38.005 kHz
 #define IR_BRIGHTNESS 50     // 0-400, 0 is off, 400 is max brightness
 #define RIGHT_IR 0
@@ -77,6 +78,7 @@ void irDecodeGarasje(){ // Decoder ir signaler bilen får og setter verdier til 
     {
         display.gotoXY(0,0);
         display.println(IR.decodedIRData.decodedRawData);
+        display.println(millis());
         if (IR.decodedIRData.decodedRawData == 2227349217 ) parkingAvailable = 1; //Femte verdi
         if (IR.decodedIRData.decodedRawData == 510274632)   parkingAvailable = 2; //Andre verdi
         if (IR.decodedIRData.decodedRawData == 1277849113 ) parkingAvailable = 3; //Tredje verdi
@@ -382,7 +384,6 @@ void setup(){
     lineSensors.initFiveSensors();
     Serial.begin(115200);
     turnSensorSetup();
-    display.setLayout21x8();
 }
 
 void loop(){

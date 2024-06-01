@@ -149,10 +149,12 @@ void receiveEvent(int howMany){
     {
         availability = Wire.read();
     }
+    /*
     Serial.print("parkingSpace: ");
     Serial.print(parkingSpace);
     Serial.print(" : ");
     Serial.println(availability);
+    */
 }
 
 
@@ -178,7 +180,6 @@ void updateNumberOfSpots(){
     if(numberOfSpots == 0){
         noSpotsAvailable = true;
     }
-    Serial.println(availabilityArray[1]);
 }
 
 
@@ -250,7 +251,8 @@ void IR_for_parking(){
                     delay(20);
                 }
                 for(int i = 0; i < spaceNumber; i++){
-                    if(digitalRead(ledPinArray[i]) == HIGH){
+                    Serial.println(digitalRead(ledPinArray[i]));
+                    if(digitalRead(ledPinArray[i]) == 1){
                         ir.sendNEC(hexForIR_Array[i], 32); 
                         Serial.print("Sender: ");
                         Serial.println(i);
@@ -293,7 +295,7 @@ void setup(){
     //pinMode(IRRecievePin, INPUT);
 
     Wire.begin(2);
-    //Wire.onReceive(receiveEvent);
+    Wire.onReceive(receiveEvent);
 
     setup_wifi();
     client.setServer(mqtt_server, 1883);
@@ -311,11 +313,9 @@ void loop(){
         reconnect();
     }
     client.loop();
-    /*
     availabilityLEDs();
     updateNumberOfSpots();
-    */
     IR_for_parking();
-    //sendParkInfo();
+    sendParkInfo();
 
 }
