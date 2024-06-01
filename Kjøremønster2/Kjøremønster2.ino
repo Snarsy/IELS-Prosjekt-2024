@@ -34,19 +34,30 @@ int driveOverNum = 0;
 unsigned long prevmillis = 0;
 int caseNum = 1;
 int linelength = 300;
+int destination = 1;
+int currentPosition = 2;
+int clockWise = 0;
+bool doDrive = 0;
+
 
 //Variabler for gasStation 
 int chargePrevMillis;
 int howMuchGas = 1;
+int charged = 0;
+bool haveturned = 0;
 
 //Variabler for garasjen
 int parkingAvailable = 0;//Har nummeret 10 fram til bilen får ledig plass.
-
+int caseNumGarage = 0;
+int currentPosGarage = 0;
 
 //Bompenger
 unsigned long BompreviousMillis = 0; // Store the last time the IR sensor was triggered
 const long Bominterval = 10000; // 10 seconds interval
 
+//Variabler for nabolag
+int nabocounter = 0;
+int husnummer = 2;
 
 void driveOverLine(){
     switch (driveOverNum){
@@ -65,17 +76,16 @@ void driveOverLine(){
     }
 }
 
-void irDecodeGarasje(){
-    if(buttonC.isPressed()) parkingAvailable = 1; //Er til slik at det er mulig å teste garasjen uten diode. Fjerne ved endelig versjon.
-    
+void irDecodeGarasje(){  
     if (IR.decode())
     {
-        Serial.println(IR.decodedIRData.decodedRawData);
-        if (IR.decodedIRData.decodedRawData == 2592268650)  parkingAvailable = 1; //Første verdi
+        display.gotoXY(0,0);
+        display.println(IR.decodedIRData.decodedRawData);
+        if (IR.decodedIRData.decodedRawData == 2592268650)  parkingAvailable = 5; //Første verdi
         if (IR.decodedIRData.decodedRawData == 510274632)   parkingAvailable = 2; //Andre verdi
         if (IR.decodedIRData.decodedRawData == 1277849113 ) parkingAvailable = 3; //Tredje verdi
         if (IR.decodedIRData.decodedRawData == 2163717077 ) parkingAvailable = 4; //Fjerde verdi
-        if (IR.decodedIRData.decodedRawData == 2227349217 ) parkingAvailable = 5; //Femte verdi
+        if (IR.decodedIRData.decodedRawData == 2227349217 ) parkingAvailable = 1; //Femte verdi
         IR.resume();
     }
 }
@@ -96,18 +106,9 @@ void irDecodeGarasje(){
     //}  
 //}
 
-int destination = 3;
-int currentPosition = 2;
-int howMuchGas = 1;
-
-int caseNumGarage = 0;
-int currentPosGarage = 0;
-bool doDrive = 0;
-int charged = 0;
-bool haveturned = 0;
 
 void garage(){
-    followLinemaxSpeed = 200;
+    followLinemaxSpeed = 100;
     switch (caseNumGarage){
         case 0://Denne casen får zumo'n til å kjøre over linjen for så å rotere utifra hvilken retning den kommer fra(clockwise). Deretter kjører den frem, stopper og venter på ir signal.
             if(!haveturned){//Her må det være mindre enn samme verdi som 81.
@@ -115,14 +116,14 @@ void garage(){
                 if(!clockWise){turndeg(90);};
                 prevcase = caseNum;
                 caseNum = 0;
-                linelength = 50;// Lengden bilen kjører over må være samme tall som i linje 76. Dette er slik at den ikke kjører lengre enn den skal.
+                linelength = 300;// Lengden bilen kjører over må være samme tall som i linje 76. Dette er slik at den ikke kjører lengre enn den skal.
                 haveturned = !haveturned;
                 break;
             }
             motors.setSpeeds(0,0);
-            linelength = 400;//Hvor mange millisekunder zumo'n skal kjøre over en linje
+            linelength = 200;//Hvor mange millisekunder zumo'n skal kjøre over en linje
             irDecodeGarasje();
-            if(millis()-prevmillis>1000){
+            if(millis()-prevmillis>5000){
                 ZumoIrSender.send(1);
                 prevmillis = millis();
             }
@@ -283,8 +284,6 @@ void gasStation(){
     }
 }
 
-int nabocounter = 0;
-int husnummer = 2;
 
 void nabolag(){
     if(!haveturned){
@@ -320,6 +319,21 @@ void nabolag(){
         if(!clockWise) turndeg(-90);
         caseNum = 1;
         nabocounter = 0;
+    }
+}
+
+void tollGate(){ //Tar imot bompenger, denne må være bare om det er dieselbil
+    unsigned long currentMillis = millis(); 
+    
+    if (IR.decode()){
+        if (IR.decodedIRData.decodedRawData == 1217527807){
+            if (BompreviousMillis == 0 || currentMillis - BompreviousMillis >= Bominterval) {
+                BompreviousMillis = currentMillis;
+
+                //Spiller G4
+                buzzer.playFrequency(392, 250, 15);
+            }
+        }
     }
 }
 
@@ -378,19 +392,4 @@ void setup(){
 void loop(){
     driving();
     tollGate();
-}
-
-void tollGate(){ //Tar imot bompenger, denne må være bare om det er dieselbil
-    unsigned long currentMillis = millis(); 
-    
-    if (IR.decode()){
-        if (IR.decodedIRData.decodedRawData == 1217527807){
-            if (BompreviousMillis == 0 || currentMillis - BompreviousMillis >= Bominterval) {
-                BompreviousMillis = currentMillis;
-
-                //Spiller G4
-                buzzer.playFrequency(392, 250, 15);
-            }
-        }
-    }
 }
