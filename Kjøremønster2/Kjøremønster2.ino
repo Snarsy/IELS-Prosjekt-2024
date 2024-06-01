@@ -39,7 +39,7 @@ bool doDrive = 0;
 
 //Variabler for ladeStasjon
 int chargePrevMillis;
-int howMuchGas = 1;
+int howMuchCharge = 1;  //kun for å teste uten ir signal
 int charged = 0;
 bool haveturned = 0;
 
@@ -87,22 +87,20 @@ void irDecodeGarasje(){ // Decoder ir signaler bilen får og setter verdier til 
         IR.resume();
     }
 }
-//void irDecodeBensin(){
-  //  if (IR.decode())
-    //  Serial.println(IR.decodeIRData.decodedRawData);
-      //  if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 1; //10
-        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 2; //20
-        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 3; //30
-        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 4; //40
-        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 5; //50   
-        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 6; //60
-        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 7; //70
-        //if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 8; //80
-        ////if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 9; //90
-        ////if (IR.decodedIRData.decodedRawData == ?)     howMuchGas = 10; //100
-        
-    //}  
-//}
+void irDecodeCharge(){
+    if (IR.decode()){
+      Serial.println(IR.decodeIRData.decodedRawData);
+        if (IR.decodedIRData.decodedRawData == 2290649224)     howMuchCharge = 1; //10
+        if (IR.decodedIRData.decodedRawData == 1216907400)     howMuchCharge = 2; //20
+        if (IR.decodedIRData.decodedRawData == 1149798536)     howMuchCharge = 3; //30
+        if (IR.decodedIRData.decodedRawData == 1145604232)     howMuchCharge = 4; //40
+        if (IR.decodedIRData.decodedRawData == 1145342088)     howMuchCharge = 5; //50   
+        if (IR.decodedIRData.decodedRawData == 1145324680)     howMuchCharge = 6; //60
+        if (IR.decodedIRData.decodedRawData == 1145324616)     howMuchCharge = 7; //70
+        if (IR.decodedIRData.decodedRawData == 1145324612)     howMuchCharge = 8; //80
+        IR.resume();
+    }  
+}
 
 
 void garage(){// Funksjon for kjøringen i garasjen
@@ -189,7 +187,7 @@ void garage(){// Funksjon for kjøringen i garasjen
     }
 }
 
-void ladeStation(){// Funksjon for når bilen kjører inn til ladestasjonen
+void chargingStation(){// Funksjon for når bilen kjører inn til ladestasjonen
     followLinemaxSpeed = 200;
     if(!haveturned){//Her må det være mindre enn samme verdi som 81.
         if(clockWise) turndeg(90);
@@ -209,51 +207,51 @@ void ladeStation(){// Funksjon for når bilen kjører inn til ladestasjonen
         if(clockWise) turndeg(90);
         if(!clockWise) turndeg(-90);
         chargePrevMillis = millis();
-        //irDecodeBensin();
+        irDecodeCharge();
         display.clear();
         display.gotoXY(0,0);
         
-        if(howMuchGas == 0){
+        if(howMuchCharge == 0){
             display.gotoXY(3,3);
             display.print("Lading avbrutt");
         }
 
-        if(howMuchGas == 1){
+        if(howMuchCharge == 1){
             display.gotoXY(3,3);
             display.print("Lading: +10%");
         }
 
-        if(howMuchGas == 2){
+        if(howMuchCharge == 2){
             display.gotoXY(3,3);
             display.print("Lading: +20%");
         }
 
-        if(howMuchGas == 3){
+        if(howMuchCharge == 3){
             display.gotoXY(3,3);
             display.print("Lading: +30%");
         }
 
-        if(howMuchGas == 4){
+        if(howMuchCharge == 4){
             display.gotoXY(3,3);
             display.print("Lading: +40%");
         }
 
-        if(howMuchGas == 5){
+        if(howMuchCharge == 5){
             display.gotoXY(3,3);
             display.print("Lading: +50%");
         }
 
-        if(howMuchGas == 6){
+        if(howMuchCharge == 6){
             display.gotoXY(3,3);
             display.print("Lading: +60%");
         }
 
-        if(howMuchGas == 7){
+        if(howMuchCharge == 7){
             display.gotoXY(3,3);
             display.print("Lading: +70%");
         }
 
-        if(howMuchGas == 8){
+        if(howMuchCharge == 8){
             display.gotoXY(3,3);
             display.print("Lading: +80%");
         }
@@ -370,7 +368,7 @@ void driving(){// Funksjon for kjøringen rundt i byen
                 garage();
                 break;
             case 3:
-                ladeStation();
+                chargingStation();
                 break;
             case 4:
                 nabolag();
