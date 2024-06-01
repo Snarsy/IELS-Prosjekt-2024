@@ -16,16 +16,12 @@ Zumo32U4IMU imu;
 #define DEVICE_ID 35
 Zumo32U4IRsender ZumoIrSender(DEVICE_ID, RIGHT_IR);
 
-#define PRINT_DEGUB_INFO 0 // Set to 1 to enable debug info
-
+//Ir Receive
 #define SUBCARIER_PERIOD 420 // The default frequency is 16000000 / (420 + 1) = 38.005 kHz
 #define IR_BRIGHTNESS 50     // 0-400, 0 is off, 400 is max brightness
-
 #define RIGHT_IR 0
 #define LEFT_IR 1
-
 const int IRPin = A4;
-
 IRrecv IR(IRPin);
 
 //Variabler for kjøremonsteret
@@ -40,7 +36,7 @@ int clockWise = 0;
 bool doDrive = 0;
 
 
-//Variabler for gasStation 
+//Variabler for ladeStasjon
 int chargePrevMillis;
 int howMuchGas = 1;
 int charged = 0;
@@ -59,7 +55,7 @@ const long Bominterval = 10000; // 10 seconds interval
 int nabocounter = 0;
 int husnummer = 2;
 
-void driveOverLine(){
+void driveOverLine(){//Funksjon til for å kjøre over linje
     switch (driveOverNum){
         case 0:
             prevmillis = millis();
@@ -76,16 +72,16 @@ void driveOverLine(){
     }
 }
 
-void irDecodeGarasje(){  
+void irDecodeGarasje(){ // Decoder ir signaler bilen får og setter verdier til hvor bilen skal kjøre i garasjen.
     if (IR.decode())
     {
         display.gotoXY(0,0);
         display.println(IR.decodedIRData.decodedRawData);
-        if (IR.decodedIRData.decodedRawData == 2592268650)  parkingAvailable = 5; //Første verdi
+        if (IR.decodedIRData.decodedRawData == 2227349217 ) parkingAvailable = 1; //Femte verdi
         if (IR.decodedIRData.decodedRawData == 510274632)   parkingAvailable = 2; //Andre verdi
         if (IR.decodedIRData.decodedRawData == 1277849113 ) parkingAvailable = 3; //Tredje verdi
         if (IR.decodedIRData.decodedRawData == 2163717077 ) parkingAvailable = 4; //Fjerde verdi
-        if (IR.decodedIRData.decodedRawData == 2227349217 ) parkingAvailable = 1; //Femte verdi
+        if (IR.decodedIRData.decodedRawData == 2592268650)  parkingAvailable = 5; //Første verdi
         IR.resume();
     }
 }
@@ -107,7 +103,7 @@ void irDecodeGarasje(){
 //}
 
 
-void garage(){
+void garage(){// Funksjon for kjøringen i garasjen
     followLinemaxSpeed = 100;
     switch (caseNumGarage){
         case 0://Denne casen får zumo'n til å kjøre over linjen for så å rotere utifra hvilken retning den kommer fra(clockwise). Deretter kjører den frem, stopper og venter på ir signal.
@@ -191,7 +187,7 @@ void garage(){
     }
 }
 
-void gasStation(){
+void ladeStation(){// Funksjon for når bilen kjører inn til ladestasjonen
     followLinemaxSpeed = 200;
     if(!haveturned){//Her må det være mindre enn samme verdi som 81.
         if(clockWise) turndeg(90);
@@ -285,7 +281,7 @@ void gasStation(){
 }
 
 
-void nabolag(){
+void nabolag(){//Funksjon for kjøringen i nabolaget
     if(!haveturned){
         if(clockWise) turndeg(90);
         if(!clockWise) turndeg(-90);
@@ -337,14 +333,14 @@ void tollGate(){ //Tar imot bompenger, denne må være bare om det er dieselbil
     }
 }
 
-void driving(){
-    switch (caseNum){           //Hovedcase for bilkjøringen. Kan evt legges inn i en void hvis dette ser bedre ut.
-            case 0:                 //driveoverline vil kjøre over en linje og returnere til det den gjorde før. Dette gjør at man kan kjøre over kryss og fortsette videre i koden. Husk prevcase = casenum før man setter casenum = 0.
+void driving(){// Funksjon for kjøringen rundt i byen
+    switch (caseNum){
+            case 0:                 // Driveoverline vil kjøre over en linje og returnere til det den gjorde før. Dette gjør at man kan kjøre over kryss og fortsette videre i koden. Husk prevcase = casenum før man setter casenum = 0.
                 driveOverLine();
                 break;
-            case 1:                 //Generellt kjørecase. Vil kjøre over linjene til den treffer ønsket posisjon
+            case 1:                 // Generell kjørecase. Vil kjøre over linjene til den treffer ønsket posisjon
                 driveLinePID();
-                if(aboveAll()){     //Treffer bilen et kryss vil den stoppe og kjøre over for så å oppdatere plasseringen.
+                if(aboveAll()){     // Treffer bilen et kryss vil den stoppe og kjøre over for så å oppdatere plasseringen.
                     prevcase = caseNum;
                     caseNum = 0;
                     if(clockWise == 1){
@@ -372,7 +368,7 @@ void driving(){
                 garage();
                 break;
             case 3:
-                gasStation();
+                ladeStation();
                 break;
             case 4:
                 nabolag();
@@ -391,5 +387,5 @@ void setup(){
 
 void loop(){
     driving();
-    tollGate();
+    //tollGate();
 }
