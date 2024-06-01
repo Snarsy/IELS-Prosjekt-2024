@@ -31,9 +31,9 @@ int driveOverNum = 0;
 unsigned long prevmillis = 0;
 int caseNum = 1;
 int linelength = 300;
-int destination = 1;
-int currentPosition = 2;
-int clockWise = 0;
+int destination = 2;
+int currentPosition = 1;
+int clockWise = 1;
 bool doDrive = 0;
 
 
@@ -89,7 +89,7 @@ void irDecodeGarasje(){ // Decoder ir signaler bilen får og setter verdier til 
 }
 void irDecodeCharge(){
     if (IR.decode()){
-      Serial.println(IR.decodeIRData.decodedRawData);
+      Serial.println(IR.decodedIRData.decodedRawData);
         if (IR.decodedIRData.decodedRawData == 2290649224)     howMuchCharge = 1; //10
         if (IR.decodedIRData.decodedRawData == 1216907400)     howMuchCharge = 2; //20
         if (IR.decodedIRData.decodedRawData == 1149798536)     howMuchCharge = 3; //30
@@ -200,7 +200,7 @@ void chargingStation(){// Funksjon for når bilen kjører inn til ladestasjonen
     }
     
     //irDecodeBensin();   //trenger ikke denne?
-    //chargePrevMillis = millis();
+    //chargePrevMillis = millis();  //denne tror jeg er feil satt her
     if (aboveAll() && charged != 1){
         motors.setSpeeds(0,0);
         doDrive = 0;
@@ -209,50 +209,41 @@ void chargingStation(){// Funksjon for når bilen kjører inn til ladestasjonen
         chargePrevMillis = millis();
         irDecodeCharge();
         display.clear();
-        display.gotoXY(0,0);
+        display.gotoXY(3,3);
         
         if(howMuchCharge == 0){
-            display.gotoXY(3,3);
             display.print("Lading avbrutt");
         }
 
         if(howMuchCharge == 1){
-            display.gotoXY(3,3);
             display.print("Lading: +10%");
         }
 
         if(howMuchCharge == 2){
-            display.gotoXY(3,3);
             display.print("Lading: +20%");
         }
 
         if(howMuchCharge == 3){
-            display.gotoXY(3,3);
             display.print("Lading: +30%");
         }
 
         if(howMuchCharge == 4){
-            display.gotoXY(3,3);
             display.print("Lading: +40%");
         }
 
         if(howMuchCharge == 5){
-            display.gotoXY(3,3);
             display.print("Lading: +50%");
         }
 
         if(howMuchCharge == 6){
-            display.gotoXY(3,3);
             display.print("Lading: +60%");
         }
 
         if(howMuchCharge == 7){
-            display.gotoXY(3,3);
             display.print("Lading: +70%");
         }
 
         if(howMuchCharge == 8){
-            display.gotoXY(3,3);
             display.print("Lading: +80%");
         }
     }  
@@ -382,9 +373,11 @@ void setup(){
     lineSensors.initFiveSensors();
     Serial.begin(115200);
     turnSensorSetup();
+    display.setLayout21x8();
 }
 
 void loop(){
     driving();
     //tollGate();
+
 }
