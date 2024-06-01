@@ -3,7 +3,6 @@
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 #include <ArduinoJson.hpp>
-#include <EEPROM.h>
 #include <IRremoteESP8266.h>
 #include <IRsend.h>
 #include <esp_sleep.h>
