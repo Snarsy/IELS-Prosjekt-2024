@@ -58,7 +58,7 @@ const int hexForIR_parkingSpace2 = 0x12345678;
 const int hexForIR_parkingSpace3 = 0x98765432;
 const int hexForIR_parkingSpace4 = 0xABCDEF01;
 const int hexForIR_noParking = 0x87654321;
-int hexForIR_ElectricCar = 2155841655;
+int hexForIR_ElectricCar = 3292233855;
 
 int hexForIR_Array[spaceNumber] = {hexForIR_parkingSpace1 ,hexForIR_parkingSpace2, hexForIR_parkingSpace3 ,hexForIR_parkingSpace4};
 
@@ -179,6 +179,7 @@ void updateNumberOfSpots(){
     if(numberOfSpots == 0){
         noSpotsAvailable = true;
     }
+    Serial.println(availabilityArray[1]);
 }
 
 
@@ -235,7 +236,7 @@ void IR_for_parking(){
     if(irrecv.decode(&results)){
         Serial.println("Test");
         Serial.println(results.value);
-        if (results.value == 2155841655){
+        if (results.value == 3292233855){
             Serial.println("ELBIL");
             //Dersom ingen ledige plasser, si ifra til bil
             if(noSpotsAvailable){
@@ -249,8 +250,8 @@ void IR_for_parking(){
                     servo1.write(posDegrees);
                     delay(20);
                 }
-                for(int i = 0; i < spaceNumber; i++){
-                    if(availabilityArray[i] == 1){
+                for(int i = 0; i < spaceNumber; i++){Serial.println("yed");
+                    if(availabilityArray[i] == HIGH){
                         ir.sendNEC(hexForIR_Array[i], 32); 
                         Serial.print("Sender: ");
                         Serial.println(i);
@@ -265,7 +266,7 @@ void IR_for_parking(){
 
             }
         } 
-        else{
+        else if(results.value == 3292217535){
             Serial.println("Access denied");
             ir.sendNEC(hexForIR_noParking, 32);
         }
