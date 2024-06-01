@@ -118,9 +118,9 @@ void garage(){// Funksjon for kjøringen i garasjen
             }
             motors.setSpeeds(0,0);
             linelength = 200;//Hvor mange millisekunder zumo'n skal kjøre over en linje
-            //irDecodeGarasje();
+            irDecodeGarasje();
             if(millis()-prevmillis>5000){
-                ZumoIrSender.send(2);
+                ZumoIrSender.send(1);
                 prevmillis = millis();
             }
             if(parkingAvailable != 0){

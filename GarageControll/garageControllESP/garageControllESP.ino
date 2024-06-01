@@ -27,7 +27,7 @@ volatile int parkingSpace, availability = -1;
 const int spaceNumber = 4;
 
 int numberOfSpotsAdress = 1;
-int previousNumberOfSpots = EEPROM.read(numberOfSpotsAdress);
+int previousNumberOfSpots = 0;
 int availability_spot1 , availability_spot2, availability_spot3, availability_spot4 = 0;
 int availabilityArray[spaceNumber] = {availability_spot1, availability_spot2, availability_spot3, availability_spot4};
 
@@ -249,8 +249,8 @@ void IR_for_parking(){
                     servo1.write(posDegrees);
                     delay(20);
                 }
-                for(int i = 0; i < spaceNumber; i++){Serial.println("yed");
-                    if(availabilityArray[i] == HIGH){
+                for(int i = 0; i < spaceNumber; i++){
+                    if(digitalRead(ledPinArray[i]) == HIGH){
                         ir.sendNEC(hexForIR_Array[i], 32); 
                         Serial.print("Sender: ");
                         Serial.println(i);
