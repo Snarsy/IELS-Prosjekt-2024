@@ -252,18 +252,20 @@ void IR_for_parking(){
                 }
                 for(int i = 0; i < spaceNumber; i++){
                     Serial.println(digitalRead(ledPinArray[i]));
-                    if(digitalRead(ledPinArray[i]) == 1){
-                        ir.sendNEC(hexForIR_Array[i], 32); 
+                    if(digitalRead(ledPinArray[i]) == HIGH){
+                        ir.sendNEC(hexForIR_Array[i], 32);
+                        delay(10); 
                         Serial.print("Sender: ");
                         Serial.println(i);
                     }  
                 }
                 delay(10000); //Venter til bilen har kjørt inn
                 Serial.println("Lukker!");
-                for(int posDegrees = 90; posDegrees <= 0; posDegrees--) {
+                servo1.write(0);
+                /*for(int posDegrees = 90; posDegrees <= 0; posDegrees--) {
                     servo1.write(posDegrees);
                     delay(20);
-                }
+                }*/
 
             }
         } 
