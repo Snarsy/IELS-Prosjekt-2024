@@ -13,13 +13,19 @@ Zumo32U4ProximitySensors proxSensor;
 Zumo32U4Buzzer buzzer;
 Zumo32U4IMU imu;
 
+#include "Turnsensor.h"
 unsigned long previousSpeedMillis = 0;
 int speedDistance, totalDistance = 0;
 int A = 1;
 int16_t firstSpeed, totalSpeed = 0;
 int readTime = 100;
 
-void speedometer() // Måler fart hvert 10.dels sekund. Siden readtime = 100.
+int speed = 100;
+unsigned long prevmillis = 0;
+int lastspeed = 0;
+int batterylevel;
+
+void batterycheck() // Måler fart hvert 10.dels sekund. Siden readtime = 100.
 {
     unsigned long speedMillis = millis();
     if (A == 1)
@@ -35,24 +41,29 @@ void speedometer() // Måler fart hvert 10.dels sekund. Siden readtime = 100.
         totalSpeed = abs((lastSpeed - firstSpeed) / 909.70 * 10.996 * 4); // Verdiene er regnet med hvor mange ganger den teller og areal av hjulet.
         speedDistance += totalSpeed / 10; // Deler på 10 siden den teller hvert 1/10 sekund.
     }
+    batterylevel = 100 - speedDistance/10;
+
+    if(batterylevel <30){
+        //destination = 3 Setter denne til ladestasjon slik at bilen vil kjøre dit for å lade.
+    }
 }
 
 void setup(){
-    motors.setSpeeds(100,100);
+    lineSensors.initFiveSensors();
+    turnSensorSetup();
+    int prevmillis = 0;
 }
-int speed = 100;
-unsigned long prevmillis = 0;
-int lastspeed = 0;
 void loop(){
-    if(millis()-prevmillis>5000){
-        prevmillis = millis();
-        speed = speed + 100;
-    }
-    speedometer();
-    motors.setSpeeds(speed,speed);
-    if(lastspeed != speedDistance){
+    readSensors();
+    batterycheck();
+    if(millis()%2 == 0){
         display.clear();
-        lastspeed = speedDistance;
+        display.print(batterylevel);
     }
-    display.println(speedDistance);
+    if(millis()<15000){
+        driveLinePID();
+    }
+    else{
+        motors.setSpeeds(0,0);
+    }
 }
