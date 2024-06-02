@@ -240,6 +240,7 @@ void IR_for_parking(){
             Serial.println("ELBIL");
             //Dersom ingen ledige plasser, si ifra til bil
             if(noSpotsAvailable){
+                delay(100);
                 ir.sendNEC(hexForIR_noParking, 32);
             }
 
