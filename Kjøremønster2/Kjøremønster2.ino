@@ -31,10 +31,11 @@ int driveOverNum = 0;
 unsigned long prevmillis = 0;
 int caseNum = 1;
 int linelength = 300;
-int destination = 2;
-int currentPosition = 1;
-int clockWise = 1;
 bool doDrive = 0;
+
+int destination = 1;
+int currentPosition = 2;
+int clockWise = 0;
 
 
 //Variabler for ladeStasjon
@@ -77,16 +78,17 @@ void irDecodeGarasje(){ // Decoder ir signaler bilen får og setter verdier til 
     if (IR.decode())
     {
         display.gotoXY(0,0);
-        display.println(IR.decodedIRData.decodedRawData);
-        display.println(millis());
-        if (IR.decodedIRData.decodedRawData == 2227349217 ) parkingAvailable = 1; //Femte verdi
+        display.clear();
+        display.print(IR.decodedIRData.decodedRawData);
+        if (IR.decodedIRData.decodedRawData == 2227349217) parkingAvailable = 1; //Femte verdi
         if (IR.decodedIRData.decodedRawData == 510274632)   parkingAvailable = 2; //Andre verdi
-        if (IR.decodedIRData.decodedRawData == 1277849113 ) parkingAvailable = 3; //Tredje verdi
-        if (IR.decodedIRData.decodedRawData == 2163717077 ) parkingAvailable = 4; //Fjerde verdi
+        if (IR.decodedIRData.decodedRawData == 1277849113) parkingAvailable = 3; //Tredje verdi
+        if (IR.decodedIRData.decodedRawData == 2163717077) parkingAvailable = 4; //Fjerde verdi
         if (IR.decodedIRData.decodedRawData == 2592268650)  parkingAvailable = 5; //Første verdi
         IR.resume();
     }
 }
+
 void irDecodeCharge(){
     if (IR.decode()){
       Serial.println(IR.decodedIRData.decodedRawData);
