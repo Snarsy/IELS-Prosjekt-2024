@@ -14,7 +14,7 @@ Zumo32U4IMU imu;
 //For ir sender
 #include "Zumo32u4IRsender.h"
 #define DEVICE_ID 35
-Zumo32U4IRsender ZumoIrSender(DEVICE_ID, RIGHT_IR);
+Zumo32U4IRsender ZumoIrSender(DEVICE_ID, LEFT_IR);
 
 //Ir Receive
 #define PRINT_DEGUB_INFO 0
@@ -123,6 +123,8 @@ void garage(){// Funksjon for kjøringen i garasjen
             irDecodeGarasje();
             if(millis()-prevmillis>5000){
                 ZumoIrSender.send(1);
+                delay(50);
+                IR.begin(IRPin, ENABLE_LED_FEEDBACK);
                 prevmillis = millis();
             }
             if(parkingAvailable != 0){
