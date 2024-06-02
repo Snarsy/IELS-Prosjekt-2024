@@ -54,8 +54,8 @@ unsigned long BompreviousMillis = 0; // Store the last time the IR sensor was tr
 const long Bominterval = 10000; // 10 seconds interval
 
 //Variabler for nabolag
-int nabocounter = 0;
-int husnummer = 2;
+int housecounter = 0;
+int housenumber = 2;
 
 void driveOverLine(){//Funksjon til for å kjøre over linje
     switch (driveOverNum){
@@ -276,7 +276,7 @@ void chargingStation(){// Funksjon for når bilen kjører inn til ladestasjonen
 }
 
 
-void nabolag(){//Funksjon for kjøringen i nabolaget
+void neighbourhood(){//Funksjon for kjøringen i nabolaget
     if(!haveturned){
         if(clockWise) turndeg(90);
         if(!clockWise) turndeg(-90);
@@ -286,30 +286,30 @@ void nabolag(){//Funksjon for kjøringen i nabolaget
     if(doDrive == 1){
         driveLinePID();
     }
-    if(nabocounter == husnummer || nabocounter == (husnummer+4)){
+    if(housecounter == housenumber || housecounter == (housenumber+4)){
         if(clockWise) turndeg(90);
         if(!clockWise) turndeg(-90);
-        nabocounter = nabocounter + 1;
+        housecounter = housecounter + 1;
     }
     if(aboveLeft() || aboveRight()){
-        nabocounter = nabocounter + 1;
+        housecounter = housecounter + 1;
         prevcase = caseNum;
         caseNum = 0;
     }
-    if(nabocounter == (husnummer+2)){
+    if(housecounter == (housenumber+2)){
         turndeg(170);
-        nabocounter = nabocounter + 1;
+        housecounter = housecounter + 1;
         doDrive = 0;
         prevmillis = millis();
     }
     if((millis()-prevmillis)>=5000){
         doDrive = 1;
     }
-    if(nabocounter == 8){
+    if(housecounter == 8){
         if(clockWise) turndeg(90);
         if(!clockWise) turndeg(-90);
         caseNum = 1;
-        nabocounter = 0;
+        housecounter = 0;
     }
 }
 
@@ -366,7 +366,7 @@ void driving(){// Funksjon for kjøringen rundt i byen
                 chargingStation();
                 break;
             case 4:
-                nabolag();
+                neighbourhood();
                 break;
         }
 }    
