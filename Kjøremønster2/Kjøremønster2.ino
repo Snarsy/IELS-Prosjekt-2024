@@ -75,6 +75,10 @@ void driveOverLine(){//Funksjon til for å kjøre over linje
 }
 
 void irDecodeGarasje(){ // Decoder ir signaler bilen får og setter verdier til hvor bilen skal kjøre i garasjen.
+    if(buttonC.isPressed()){
+        parkingAvailable = 3;
+    }
+    
     if (IR.decode())
     {
         display.gotoXY(0,0);
@@ -106,7 +110,7 @@ void irDecodeCharge(){
 
 
 void garage(){// Funksjon for kjøringen i garasjen
-    followLinemaxSpeed = 100;
+    followLinemaxSpeed = 200;
     switch (caseNumGarage){
         case 0://Denne casen får zumo'n til å kjøre over linjen for så å rotere utifra hvilken retning den kommer fra(clockwise). Deretter kjører den frem, stopper og venter på ir signal.
             if(!haveturned){//Her må det være mindre enn samme verdi som 81.
@@ -133,7 +137,7 @@ void garage(){// Funksjon for kjøringen i garasjen
             break;
         case 1:// Her er det en rekke tilfeller. Sjekker om bilen er ved linje hvor den vil kjøre over. Deretter kjører den inn eller over krysset.
             driveLinePID();
-            if(aboveAll() && currentPosGarage == (parkingAvailable+1)){//Hvis den treffer et kryss og er på riktig plass i garasjen vil den snu 180 grader og bytte til case 2 hvor den står i ro.
+            if(aboveAll()){//Hvis den treffer et kryss og er på riktig plass i garasjen vil den snu 180 grader og bytte til case 2 hvor den står i ro.
                 prevmillis = millis();
                 if(parkingAvailable == 1){// Hvis den ikke får parkere ved at det ikke er plass vil den kjøre over linjen og bytte til case 3.
                     caseNumGarage = 3;
