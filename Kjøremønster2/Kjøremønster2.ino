@@ -137,7 +137,7 @@ void garage(){// Funksjon for kjøringen i garasjen
             break;
         case 1:// Her er det en rekke tilfeller. Sjekker om bilen er ved linje hvor den vil kjøre over. Deretter kjører den inn eller over krysset.
             driveLinePID();
-            if(aboveAll()){//Hvis den treffer et kryss og er på riktig plass i garasjen vil den snu 180 grader og bytte til case 2 hvor den står i ro.
+            if(aboveAll() && currentPosGarage < 8){//Hvis den treffer et kryss og er på riktig plass i garasjen vil den snu 180 grader og bytte til case 2 hvor den står i ro.
                 prevmillis = millis();
                 if(parkingAvailable == 1){// Hvis den ikke får parkere ved at det ikke er plass vil den kjøre over linjen og bytte til case 3.
                     caseNumGarage = 3;
