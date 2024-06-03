@@ -79,20 +79,16 @@ void driveOverLine(){//Funksjon til for å kjøre over linje
 }
 
 void irDecodeGarasje(){ // Decoder ir signaler bilen får og setter verdier til hvor bilen skal kjøre i garasjen.
-    if(buttonC.isPressed()){
-        parkingAvailable = 3;
-    }
-    
     if (IR.decode())
     {
         display.gotoXY(0,0);
         display.clear();
         display.print(IR.decodedIRData.decodedRawData);
-        if (IR.decodedIRData.decodedRawData == 2227349217) parkingAvailable = 1; //Femte verdi
-        if (IR.decodedIRData.decodedRawData == 510274632)   parkingAvailable = 2; //Andre verdi
-        if (IR.decodedIRData.decodedRawData == 1277849113) parkingAvailable = 3; //Tredje verdi
-        if (IR.decodedIRData.decodedRawData == 2163717077) parkingAvailable = 4; //Fjerde verdi
-        if (IR.decodedIRData.decodedRawData == 2592268650)  parkingAvailable = 5; //Første verdi
+        if (IR.decodedIRData.decodedRawData == 2227349217) parkingAvailable = 1; // Ingen plass/Bensinbin
+        if (IR.decodedIRData.decodedRawData == 510274632)   parkingAvailable = 2; // Første plass
+        if (IR.decodedIRData.decodedRawData == 1277849113) parkingAvailable = 3; // Andre plass
+        if (IR.decodedIRData.decodedRawData == 2163717077) parkingAvailable = 4; // Tredje plass
+        if (IR.decodedIRData.decodedRawData == 2592268650)  parkingAvailable = 5; // Fjerde plass
         IR.resume();
     }
 }
