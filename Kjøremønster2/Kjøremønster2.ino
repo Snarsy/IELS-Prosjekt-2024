@@ -33,18 +33,18 @@ int caseNum = 1;
 int linelength = 300;
 bool doDrive = 0;
 
-int destination = 1;
-int currentPosition = 2;
+int destination = 15;
+int currentPosition = 1;
 int clockWise = 0;
 
 
-//Variabler for ladeStasjon
+//LadeStasjon
 int chargePrevMillis;
 int howMuchCharge = 1;  //kun for å teste uten ir signal
 int charged = 0;
 bool haveturned = 0;
 
-//Variabler for garasjen
+//Garasjen
 int parkingAvailable = 0;//Har nummeret 10 fram til bilen får ledig plass.
 int caseNumGarage = 0;
 int currentPosGarage = 0;
@@ -53,7 +53,7 @@ int currentPosGarage = 0;
 unsigned long BompreviousMillis = 0; // Store the last time the IR sensor was triggered
 const long Bominterval = 10000; // 10 seconds interval
 
-//Variabler for nabolag
+//Nabolag
 int housecounter = 0;
 int housenumber = 2;
 
@@ -339,6 +339,16 @@ void driving(){// Funksjon for kjøringen rundt i byen
                 break;
             case 1:                 // Generell kjørecase. Vil kjøre over linjene til den treffer ønsket posisjon
                 driveLinePID();
+                if(currentPosition == 11 && clockWise){
+                    currentPosition = 0;
+                }
+                else if(currentPosition == -1 && !clockWise){
+                    currentPosition = 10;
+                }
+                if(millis()%5==0){
+                    display.clear();
+                    display.print(currentPosition);
+                }
                 if(aboveAll()){     // Treffer bilen et kryss vil den stoppe og kjøre over for så å oppdatere plasseringen.
                     prevcase = caseNum;
                     caseNum = 0;
@@ -381,7 +391,6 @@ void setup(){
     lineSensors.initFiveSensors();
     Serial.begin(115200);
     turnSensorSetup();
-    display.setLayout21x8();
 }
 
 void loop(){
