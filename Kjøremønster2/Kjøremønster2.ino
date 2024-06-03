@@ -30,12 +30,12 @@ int prevcase;
 int driveOverNum = 0;
 unsigned long prevmillis = 0;
 int caseNum = 1;
-int linelength = 300;
+int linelength = 400;
 bool doDrive = 0;
 
-int destination = 15;
-int currentPosition = 1;
-int clockWise = 0;
+int destination = 4;
+int currentPosition = 0;
+int clockWise = 1;
 
 
 //LadeStasjon
@@ -56,6 +56,10 @@ const long Bominterval = 10000; // 10 seconds interval
 //Nabolag
 int housecounter = 0;
 int housenumber = 2;
+
+//Outsider
+int outsidercounter = 0; // Setter man denne til 3 og caseNum til 5 så vil bilen være klar for å starte ved huset utenfor byen.
+unsigned long outsidermillis;
 
 void driveOverLine(){//Funksjon til for å kjøre over linje
     switch (driveOverNum){
@@ -163,7 +167,7 @@ void garage(){// Funksjon for kjøringen i garasjen
             if(currentPosGarage == 9){//Denne kommer i bruk når bilen kjører ut. Dette skjer etter case 2.
                 turndeg(90);
                 caseNum = 1;
-                currentPosition = 2;
+                currentPosition = 9;
                 haveturned = 0;
             }
             break;
@@ -317,6 +321,37 @@ void neighbourhood(){//Funksjon for kjøringen i nabolaget
     }
 }
 
+void outsider(){
+    if(outsidercounter == 0){
+        if(clockWise) turndeg(-90);
+        if(!clockWise) turndeg(90);
+        outsidercounter = 1;
+    }
+    if(outsidercounter == 1){
+        driveLinePID();
+        if(aboveAll()){
+            turndeg(170);
+            outsidercounter = 3;
+            outsidermillis = millis();
+        }
+    }
+    if(outsidercounter == 2){
+        outsidercounter = 0;
+        caseNum = 1;
+        currentPosition = 1;
+        destination = 10;
+        turndeg(90);
+    }
+    if(millis()-outsidermillis>10000 && outsidercounter == 3){
+        driveLinePID();
+        if(aboveAll()){
+            outsidercounter = 2; // Sier at bilen skal til garasjen fra hjemme.
+            prevcase = caseNum;
+            caseNum = 0;
+        }
+    }
+}
+
 void tollGate(){ //Tar imot bompenger, denne må være bare om det er dieselbil
     unsigned long currentMillis = millis(); 
     
@@ -362,14 +397,17 @@ void driving(){// Funksjon for kjøringen rundt i byen
                 }
                 if(currentPosition == destination){//Hvis bilen er på riktig plass vil den rotere 90 grader og bytte til kjøremønsteret for destinasjonen.
                     prevmillis = millis();
-                    if(destination == 1){//I dette tilfellet er destination = 3, garasjen.
+                    if(destination == 10){//I dette tilfellet er destination = 3, garasjen.
                         caseNum = 2;
                     }
-                    else if(destination == 2){
-                        caseNum = 3;
+                    else if(destination == 6){
+                        caseNum = 3;//Ladestasjon
                     }
-                    else if(destination == 3){
-                        caseNum = 4;
+                    else if(destination == 4){
+                        caseNum = 4;//Nabolag
+                    }
+                    else if(destination == 2){
+                        caseNum = 5;//Outsider
                     }
                 }
                 break;
@@ -382,6 +420,9 @@ void driving(){// Funksjon for kjøringen rundt i byen
             case 4:
                 neighbourhood();
                 break;
+            case 5:
+                outsider();
+                break;
         }
 }    
 
@@ -391,10 +432,10 @@ void setup(){
     lineSensors.initFiveSensors();
     Serial.begin(115200);
     turnSensorSetup();
+    prevmillis, outsidermillis = 0;
 }
 
 void loop(){
     driving();
-    //tollGate();
-
+    tollGate();
 }
