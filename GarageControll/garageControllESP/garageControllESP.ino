@@ -10,7 +10,6 @@
 #include <Servo.h>
 
 
-
 // MQTT-variabler
 
 const char* ssid = "NTNU-IOT";
@@ -35,6 +34,9 @@ long lastMsg = 0;
 
 bool noSpotsAvailable = false;
 
+long parkingTimer;
+long lastParkingTimer;
+
 
 // LED-pins
 
@@ -51,7 +53,7 @@ int ledPinArray[spaceNumber] = {ledPin_1, ledPin_2, ledPin_3, ledPin_4};
 const uint16_t IRPin = 32;  // ESP32 pin GPIO 32
 const uint16_t IRRecievePin = 33; //ESP32 pin GPIO 33
 
-const int IR_delay = 10000;
+const int sleep_delay = 10000;
 const int hexForIR_parkingSpace1 = 0x56874159;
 const int hexForIR_parkingSpace2 = 0x12345678;
 const int hexForIR_parkingSpace3 = 0x98765432;
@@ -62,6 +64,11 @@ int hexForIR_ElectricCar = 3292233855;
 int hexForIR_Array[spaceNumber] = {hexForIR_parkingSpace1 ,hexForIR_parkingSpace2, hexForIR_parkingSpace3 ,hexForIR_parkingSpace4};
 
 long lastSentIR = 0;
+
+int randomLedigPlass;
+int sisteSendtePlass;
+
+bool firstIR = false;
 
 //Servo-variabler
 
@@ -164,14 +171,21 @@ void updateNumberOfSpots(){
     for(int i = 0; i < spaceNumber; i++){
 
         if(digitalRead(ledPinArray[i]) == HIGH){
-            numberOfSpots += 1;
-            noSpotsAvailable = false;
+                lastParkingTimer = parkingTimer;
+                numberOfSpots += 1;
+                noSpotsAvailable = false;
+            if(randomLedigPlass == i && parkingTimer - lastParkingTimer > 20000){
+                availabilityArray[i] = 1;
+            }else{
+                availabilityArray[i] = 1;
+                }
         }
-        
-        availabilityArray[i] == digitalRead(ledPinArray[i]);
+        else if(digitalRead(ledPinArray[i]) == LOW){
+            availabilityArray[i] = 0;
+        }
     }
 
-    //Dersom antall ledige plasser endres, skriv ut til eeprom
+    //Dersom antall ledige plasser endres
     if(numberOfSpots != previousNumberOfSpots){
         previousNumberOfSpots = numberOfSpots;
     }
@@ -215,29 +229,11 @@ void availabilityLEDs(){
 
 
 void IR_for_parking(){
-    /*if(now - lastSentIR > IR_delay){
-        lastSentIR = now;
 
-        //Dersom ingen ledige plasser, si ifra til bil
-        if(noSpotsAvailable){
-            ir.sendNEC(hexForIR_noParking, 32);
-        }
-
-        //Ellers send ut en av plassene
-        else{
-            for(int i = 0; i < spaceNumber; i++){
-                if(availabilityArray[i] == 1){
-                    ir.sendNEC(hexForIR_Array[i], 32);
-                    delay(10); 
-                }
-            }
-        }
-    }*/
     if(irrecv.decode(&results)){
-        Serial.println("Test");
-        Serial.println(results.value);
+
         if (results.value == 3292233855){
-            Serial.println("ELBIL");
+
             //Dersom ingen ledige plasser, si ifra til bil
             if(noSpotsAvailable){
                 ir.sendNEC(hexForIR_noParking, 32);
@@ -250,17 +246,23 @@ void IR_for_parking(){
                     servo1.write(posDegrees);
                     delay(20);
                 }
+                
                 for(int i = 0; i < spaceNumber; i++){
-                    Serial.println(digitalRead(ledPinArray[i]));
-                    if(digitalRead(ledPinArray[i]) == 1){
-                        ir.sendNEC(hexForIR_Array[i], 32); 
+                    Serial.println(randomLedigPlass);
+                    if(availabilityArray[i] == 1 && sisteSendtePlass != i){
+                        ir.sendNEC(hexForIR_Array[i], 32);
                         Serial.print("Sender: ");
                         Serial.println(i);
-                    }  
+                        availabilityArray[i] = 0;
+                        parkingTimer = millis();
+                        randomLedigPlass = i;
+                        i = spaceNumber;
+                    }
                 }
+                sisteSendtePlass = randomLedigPlass; //Ikke send fler enn ett signal, og ikke send det siste sendte. 
                 delay(10000); //Venter til bilen har kjørt inn
                 Serial.println("Lukker!");
-                for(int posDegrees = 90; posDegrees <= 0; posDegrees--) {
+                for(int posDegrees = 90; posDegrees > 0; posDegrees--) {
                     servo1.write(posDegrees);
                     delay(20);
                 }
@@ -272,14 +274,14 @@ void IR_for_parking(){
             ir.sendNEC(hexForIR_noParking, 32);
         }
 
-    irrecv.resume();  // Receive the next value
+        irrecv.resume();  // Receive the next value
 
-    long now = millis();
-    if(now - lastSentIR > IR_delay){
-        lastSentIR = now;
-        //esp_light_sleep_start();
+        long now = millis();
+        if(now - lastSentIR > sleep_delay){
+            lastSentIR = now;
+            //esp_light_sleep_start();
+        }
     }
-}
 }
 
 //MAIN
@@ -304,6 +306,8 @@ void setup(){
     ir.begin();
 
     //esp_sleep_enable_ext0_wakeup((gpio_num_t)IRRecievePin, 1);
+
+    randomSeed(analogRead(15));
 }
 
 
@@ -317,5 +321,5 @@ void loop(){
     updateNumberOfSpots();
     IR_for_parking();
     sendParkInfo();
-
+    
 }
