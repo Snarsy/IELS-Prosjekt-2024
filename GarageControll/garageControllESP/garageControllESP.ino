@@ -236,6 +236,7 @@ void IR_for_parking(){
 
             //Dersom ingen ledige plasser, si ifra til bil
             if(noSpotsAvailable){
+                delay(100);
                 ir.sendNEC(hexForIR_noParking, 32);
             }
 
@@ -265,7 +266,7 @@ void IR_for_parking(){
                 for(int posDegrees = 90; posDegrees > 0; posDegrees--) {
                     servo1.write(posDegrees);
                     delay(20);
-                }
+                }*/
 
             }
         } 

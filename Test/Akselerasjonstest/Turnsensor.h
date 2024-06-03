@@ -216,7 +216,6 @@ bool aboveLeft(){
     }
 }
 bool aboveAll(){
-    readSensors();
     if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4)){
         return true;
     }
