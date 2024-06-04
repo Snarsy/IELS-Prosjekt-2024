@@ -1,3 +1,7 @@
+//Her har jeg tatt kode fra:
+//https://randomnerdtutorials.com/esp8266-and-node-red-with-mqtt/
+//Og fikset som jeg ønsker
+
 #include <PubSubClient.h>
 #include <WiFi.h>
 #include <ArduinoJson.h>
@@ -49,12 +53,12 @@ void callback(String topic, byte *message, unsigned int length)
 
   for (int i = 0; i < length; i++)
   {
-    //Serial.print((char)message[i]);
+
     messageTemp += (char)message[i];
   }
   Serial.println();
 
-  if (topic == "trondheim/temperature")
+  if (topic == "trondheim/temperature") //Hvis koden mottar info fra mqtt
   {
     float temperature = messageTemp.toFloat();
 
@@ -96,15 +100,14 @@ void loop()
   StaticJsonDocument<80> doc;
   char output[80];
 
-  // Delay between sending messages
+  // Delay mellom å sende medling
   long now = millis();
   if (now - lastMsg > 5000)
   {
     lastMsg = now;
 
-    // Gjør om JSON til seriell
+    // Gjør om JSON til seriell. Denne blir bare brukt for å oppdate node-red sin værmodul. Trenger ingen verdi
     serializeJson(doc, output); 
-    // Serial.println(output);
     client.publish("trondheim/weather", output);
   }
 
@@ -132,7 +135,7 @@ void reconnect()
     {
       Serial.print("Failed, code=");
       Serial.println(client.state());
-      delay(5000); // Wait 5 seconds before retrying
+      delay(5000); // Vent 5 sekund på kode
     }
   }
 }

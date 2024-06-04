@@ -1,3 +1,6 @@
+//Her er linjefølging tatt fra Kevil Pololu sin GitHub:
+//https://github.com/pololu/zumo-32u4-arduino-library/blob/master/examples/LineFollower/LineFollower.ino
+
 #include <Wire.h>
 #include <Zumo32U4.h>
 
@@ -39,7 +42,7 @@ void setup() {
 }
 
 void driveLinePIDNormalSpeed()
-{ //Linjefølging tatt fra Kevin Pololu. 
+{
     int16_t position = lineSensors.readLine(lineSensorValues); //Leser linjeesensor. 
     int16_t error = position - 2000; //Finnet ut om det er venstre eller høyre som er mer utenfor linjen.
     int16_t speedDifference = error / 1 + 4 * (error - lastError); 
@@ -61,7 +64,7 @@ void driveLinePIDSlowSpeed(){
 
     lastError = error;
 
-    int leftSpeed = followLinemaxSpeed*0.5 + speedDifference;
+    int leftSpeed = followLinemaxSpeed*0.5 + speedDifference; //Kjører 50% treigere
     int rightSpeed = followLinemaxSpeed*0.5 - speedDifference;
     leftSpeed = constrain(leftSpeed, 0, (int16_t)followLinemaxSpeed); //Constrain for å ikke få minus, og ikke over 400 verdi. 
     rightSpeed = constrain(rightSpeed, 0, (int16_t)followLinemaxSpeed);
@@ -89,16 +92,16 @@ void busstop(){
         motors.setSpeeds(100,100);
         delay(100);
         motors.setSpeeds(0,0);
-        // Play G4 (392 Hz)
-        buzzer.playFrequency(392, 250, 15); // Frequency, duration in ms, volume (0-15)
+        // Spiller G4 (392 Hz)
+        buzzer.playFrequency(392, 250, 15);
         delay(250); 
 
-        // Play D5 (587 Hz)
-        buzzer.playFrequency(587, 250, 15); // Frequency, duration in ms, volume (0-15)
+        // Spiller D5 (587 Hz)
+        buzzer.playFrequency(587, 250, 15); 
         delay(250); 
 
-        // Play G5 (784 Hz)
-        buzzer.playFrequency(784, 250, 15); // Frequency, duration in ms, volume (0-15)
+        // Spiller G5 (784 Hz)
+        buzzer.playFrequency(784, 250, 15);
         delay(250); 
         delay(5000);
     }
