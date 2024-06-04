@@ -70,6 +70,8 @@ int readTime = 100;
 int speed = 100;
 int lastspeed = 0;
 int batterylevel;
+int accelerometer;
+int prevSpeed;
 #include "DriveLib.h"
 
 

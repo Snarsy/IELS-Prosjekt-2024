@@ -102,4 +102,5 @@ void batterycheck() // Måler fart hvert 10.dels sekund. Siden readtime = 100.
     if(batterylevel < 30){
         destination = 6; //Setter denne til ladestasjon slik at bilen vil kjøre dit for å lade.
     }
+    accelerometer = totalSpeed - prevSpeed;
 }

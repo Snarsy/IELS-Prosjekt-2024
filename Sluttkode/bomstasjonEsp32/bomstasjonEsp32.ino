@@ -68,7 +68,7 @@ void loop() {
 }*/
 
 
-//#include <Adafruit_NeoPixel.h>
+
 #include <Arduino.h>
 #include <SPI.h>
 #include "U8glib.h" // include the universal graphcs library
@@ -84,14 +84,19 @@ U8GLIB_SSD1306_128X64 u8g(12, 11, 10, 9, 8);    // initialise a u8g display obje
 
 void setup() {
   u8g.begin();
-  u8g.setFont(u8g_font_unifont);
+  u8g.setFont(u8g_font_6x10);  //unifont
 }
 
 void skjerm(){
   u8g.firstPage();
   do{
-    u8g.drawStr( 1, 22, "Viva Canarias");
+    u8g.drawStr( 35, 10, "Ladeprosent");
+    u8g.drawStr( 60, 30, "20%");
+    u8g.drawStr(7, 60, "Avbryt");
+    u8g.drawStr(100, 60, "Kjop");
+
     }while(u8g.nextPage());
+  
 }
 
 void loop() {
