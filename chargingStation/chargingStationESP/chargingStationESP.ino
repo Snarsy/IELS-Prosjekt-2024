@@ -1,12 +1,9 @@
+#include <Wire.h>
 #include <Adafruit_APDS9960.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <IRremoteESP8266.h>
 #include <IRsend.h>
-
-#include <Arduino.h>
-#include <SPI.h>
-#include <U8glib.h> // include the universal graphcs library
 
 
 IRsend irsend(IRPin);
@@ -46,33 +43,25 @@ int transactionCaseNumber = 0;
 
 
 void setup() {
-  
+    //Seriell komunikasjon
     Serial.begin(9600);
 
+    //Bevegelsesføler
     if(!apds.begin()){
       Serial.println("failed to initialize device! Please check your wiring.");
     }
     else Serial.println("Device initialized!");
 
-    irsend.begin();
-
-    //gesture mode will be entered once proximity mode senses something close
     apds.enableProximity(true);
     apds.enableGesture(true);
 
+    //IR-setup
+    irsend.begin();
+
+    //Wifi
     setup_wifi();
     client.setServer(mqtt_server, 1883);
     client.setCallback(callback);
-
-    u8g.begin();
-    u8g.setFont(u8g_font_unifont);
-}
-
-void skjerm(){
-  u8g.firstPage();
-  do{
-    u8g.drawStr( 1, 22, "Viva Canarias");
-    }while(u8g.nextPage());
 }
 
 void batterygestures(){
@@ -95,6 +84,10 @@ void batterygestures(){
 
   if(gesture == APDS9960_DOWN){
     batteryCharge -= 10;
+
+    Wire.beginTransmission(4); // transmit to device #4
+    Wire.write("1");
+    Wire.endTransmission();
   }
 
   if(gesture == APDS9960_UP){
@@ -106,18 +99,34 @@ void batterygestures(){
       display.print("ladingsnivå");
       display.gotoXY(10,7);
       display.print("nådd!")
+
+      Wire.beginTransmission(4); // transmit to device #4
+      Wire.write("3");
+      Wire.endTransmission();
       delay(3000);
     } else{
-      batteryCharge += 10;  
+      batteryCharge += 10;
+
+      Wire.beginTransmission(4); // transmit to device #4
+      Wire.write("2");
+      Wire.endTransmission();  
     } 
   } 
 
   if(gesture == APDS9960_LEFT){
     transactionCaseNumber = 1;
+
+    Wire.beginTransmission(4); // transmit to device #4
+    Wire.write("11");
+    Wire.endTransmission();
   } 
 
   if(gesture == APDS9960_RIGHT){
     transactionCaseNumber = 2;
+
+    Wire.beginTransmission(4); // transmit to device #4
+    Wire.write("12");
+    Wire.endTransmission();
   } 
 }
 
@@ -139,6 +148,10 @@ void doyouwanttocancel(){
 
   if (gesture == APDS9960_LEFT){
     transactionCaseNumber = 0;
+
+    Wire.beginTransmission(4); // transmit to device #4
+    Wire.write("11");
+    Wire.endTransmission();
   }
 
   if (gesture == APDS9960_RIGHT){
@@ -148,6 +161,10 @@ void doyouwanttocancel(){
     delay(2000);
     batteryCharge = 0;
     transactionCaseNumber = 3;
+    
+    Wire.beginTransmission(4); // transmit to device #4
+    Wire.write("12");
+    Wire.endTransmission();
   }
 }
 
@@ -169,10 +186,18 @@ void doyouwanttobuy(){
 
   if (gesture == APDS9960_LEFT){
     transactionCaseNumber = 0;
+
+    Wire.beginTransmission(4); // transmit to device #4
+    Wire.write("11");
+    Wire.endTransmission();
   }
 
   if (gesture == APDS9960_RIGHT){
     transactionCaseNumber = 3;
+
+    Wire.beginTransmission(4); // transmit to device #4
+    Wire.write("12");
+    Wire.endTransmission();
   }
 }
 
