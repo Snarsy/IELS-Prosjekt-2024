@@ -1,8 +1,12 @@
-#include "Adafruit_APDS9960.h"
+#include <Adafruit_APDS9960.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <IRremoteESP8266.h>
 #include <IRsend.h>
+
+#include <Arduino.h>
+#include <SPI.h>
+#include <U8glib.h> // include the universal graphcs library
 
 
 IRsend irsend(IRPin);
@@ -10,6 +14,7 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 Adafruit_APDS9960 apds;
 
+U8GLIB_SSD1306_128X64 u8g(12, 11, 10, 9, 8);
 
 // MQTT-variabler
 
@@ -58,8 +63,17 @@ void setup() {
     setup_wifi();
     client.setServer(mqtt_server, 1883);
     client.setCallback(callback);
+
+    u8g.begin();
+    u8g.setFont(u8g_font_unifont);
 }
 
+void skjerm(){
+  u8g.firstPage();
+  do{
+    u8g.drawStr( 1, 22, "Viva Canarias");
+    }while(u8g.nextPage());
+}
 
 void batterygestures(){
 
@@ -110,7 +124,7 @@ void batterygestures(){
 void doyouwanttocancel(){
 
   display.clear();
-  display.gotoXY(2,1):
+  display.gotoXY(2,1);
   display.print("Vil du avbryte?")
   display.gotoXY(1, 6);
   display.print("Venstre")
@@ -164,7 +178,7 @@ void doyouwanttobuy(){
 
 void sendCharge(){
   if(batteryCharge == 0){
-    irsend.sendNec(hexForIR_howMuchCharge0, 32);
+    irsend.sendNEC(hexForIR_howMuchCharge0, 32);
   }
   
   if(batteryCharge == 10){

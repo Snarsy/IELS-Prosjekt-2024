@@ -68,56 +68,33 @@ void loop() {
 }*/
 
 
-//#include <MUIU8g2.h>
-#include <U8g2lib.h>
-#include <Wire.h>
+//#include <Adafruit_NeoPixel.h>
+#include <Arduino.h>
 #include <SPI.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
-//#include <U8x8lib.h>
-#define OLED_MOSI   23
-#define OLED_CLK    18
-#define OLED_DC     16
-#define OLED_CS     5
-#define OLED_RESET  17
+#include "U8glib.h" // include the universal graphcs library
 
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+//U8G2_SSD1306_128X64_NONAME_1_4W_SW_SPI display(U8G2_R0, /* clock=/ 13, / data=/ 11, / cs=/ 10, / dc=/ 9, / reset=*/ 8);
 
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+ 
+U8GLIB_SSD1306_128X64 u8g(12, 11, 10, 9, 8);    // initialise a u8g display object
+//clk = 12, mosi = 11, cs = 10, dc = 9, res = 8.  på arduino
 
-
-//U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
-U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE, /* clock=*/ SCL, /* data=*/ SDA);
+//U8GLIB_SSD1306_128X64 u8g(19, 23, 18, 17, 27);    // initialise a u8g display object
+//clk = 19, mosi = 23, cs = 18, dc = 17, res = 27. på esp32
 
 void setup() {
-  u8g2.begin();
-  Serial.begin(115200);
+  u8g.begin();
+  u8g.setFont(u8g_font_unifont);
 }
 
-void first() {
-  /*u8g2.clearBuffer();           // Fjern innholdet i bufferet
-  u8g2.setFont(u8g2_font_ncenB08_tr);  // Sett font
-  u8g2.drawStr(0,10,"Hello, world!");  // Tegn tekst
-  u8g2.sendBuffer();            // Send bufferet til skjermen
-  delay(1000);*/
-  display.drawPixel(10, 10, WHITE);
-
+void skjerm(){
+  u8g.firstPage();
+  do{
+    u8g.drawStr( 1, 22, "Viva Canarias");
+    }while(u8g.nextPage());
 }
 
-
-/*void second(){
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(SH1106_WHITE);
-  display.setCursor(5,28);
-  display.println("Electronics Hub");
-  display.display();
-  delay(3000);
-}*/
-
-
-void loop(){
-  first();
+void loop() {
+  skjerm();
 }
-
+//Fjern neopixel
