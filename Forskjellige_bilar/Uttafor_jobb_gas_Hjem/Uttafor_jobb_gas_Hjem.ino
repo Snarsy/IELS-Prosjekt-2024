@@ -33,9 +33,9 @@ int linelength = 400;
 bool doDrive = 0;
 
 int caseNum = 5;
-int destination = 4;
-int currentPosition = 0;
-int clockWise = 1;
+int destination = 10;
+int currentPosition = 1;
+int clockWise = 0;
 
 
 //LadeStasjon
@@ -58,7 +58,7 @@ int housecounter = 0;
 int housenumber = 2;
 
 //Outsider
-int outsidercounter = 0; // Setter man denne til 3 og caseNum til 5 så vil bilen være klar for å starte ved huset utenfor byen.
+int outsidercounter = 3; // Setter man denne til 3 og caseNum til 5 så vil bilen være klar for å starte ved huset utenfor byen.
 unsigned long outsidermillis;
 
 // Batterinivå
@@ -71,6 +71,7 @@ int speed = 100;
 int lastspeed = 0;
 int batterylevel;
 #include "DriveLib.h"
+
 
 void driveOverLine(){//Funksjon til for å kjøre over linje
     switch (driveOverNum){
@@ -90,6 +91,9 @@ void driveOverLine(){//Funksjon til for å kjøre over linje
 }
 
 void irDecodeGarasje(){ // Decoder ir signaler bilen får og setter verdier til hvor bilen skal kjøre i garasjen.
+    if(buttonC.isPressed()){
+        parkingAvailable = 3;
+    }
     if (IR.decode())
     {
         display.gotoXY(0,0);
@@ -121,7 +125,6 @@ void irDecodeCharge(){
 
 
 void garage(){// Funksjon for kjøringen i garasjen
-    followLinemaxSpeed = 200;
     switch (caseNumGarage){
         case 0://Denne casen får zumo'n til å kjøre over linjen for så å rotere utifra hvilken retning den kommer fra(clockwise). Deretter kjører den frem, stopper og venter på ir signal.
             if(!haveturned){//Her må det være mindre enn samme verdi som 81.
@@ -147,7 +150,8 @@ void garage(){// Funksjon for kjøringen i garasjen
             }
             break;
         case 1:// Her er det en rekke tilfeller. Sjekker om bilen er ved linje hvor den vil kjøre over. Deretter kjører den inn eller over krysset.
-            driveLinePID();
+        followLinemaxSpeed = 200;
+            readSensors();
             if(aboveAll() && currentPosGarage < 8){//Hvis den treffer et kryss og er på riktig plass i garasjen vil den snu 180 grader og bytte til case 2 hvor den står i ro.
                 prevmillis = millis();
                 if(parkingAvailable == 1){// Hvis den ikke får parkere ved at det ikke er plass vil den kjøre over linjen og bytte til case 3.
@@ -156,7 +160,7 @@ void garage(){// Funksjon for kjøringen i garasjen
                     caseNum = 0;
                     break;
                 }
-                turndeg(175);
+                turndeg(180);
                 caseNumGarage = 2;
                 break;
             }
@@ -176,7 +180,9 @@ void garage(){// Funksjon for kjøringen i garasjen
                 caseNum = 1;
                 currentPosition = 9;
                 haveturned = 0;
+                destination = 6;
             }
+            driveLinePID();
             break;
         case 2:
             if(millis()-prevmillis<3000 && currentPosGarage == (parkingAvailable+1)){
@@ -449,5 +455,6 @@ void loop(){
         display.clear();
         display.println(currentPosition);
         display.print(batterylevel);
+        display.println(currentPosGarage);
     }
 }
