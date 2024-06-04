@@ -75,18 +75,6 @@ void skjermValg(){
     switch (skjerm)
     {
     case 1:
-        //Kjøpeskjerm
-        u8g.firstPage();
-        do{
-            u8g.drawStr( 35, 22, "Godkjenn");
-            u8g.drawStr( 35, 35, "betaling");
-            u8g.drawStr( 7, 60, "Nei");
-            u8g.drawStr( 100, 60, "Ja");
-            }while(u8g.nextPage());
-
-        break;
-
-    case 2: 
         //Hjemskjerm
         u8g.firstPage();
         do{
@@ -121,6 +109,31 @@ void skjermValg(){
             u8g.drawStr(7, 60, "Avbryt");
             u8g.drawStr(100, 60, "Betal");
             }while(u8g.nextPage());
+        break;
+        
+    case 2: 
+        //Kjøpeskjerm
+        u8g.firstPage();
+        do{
+            u8g.drawStr( 35, 22, "Godkjenn");
+            u8g.drawStr( 35, 35, "betaling");
+            u8g.drawStr( 7, 60, "Nei");
+            u8g.drawStr( 100, 60, "Ja");
+            }while(u8g.nextPage());
+
+        break;
+        
+    case 3:
+        //Hadeskjerm
+        u8g.firstPage();
+        do{
+            u8g.drawStr( 35, 10, "Lading");
+            u8g.drawStr( 35, 35, "ferdig");
+            u8g.drawStr( 35, 60, "Hade:)");
+            }while(u8g.nextPage());
+
+        break;
+
     
     //FOR HØY STRØM
     case 10:
