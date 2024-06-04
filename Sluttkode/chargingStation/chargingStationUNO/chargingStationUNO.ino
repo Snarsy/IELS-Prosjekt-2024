@@ -1,8 +1,13 @@
 #include <Wire.h>
+#include <Arduino.h>
+#include <SPI.h>
+#include <U8glib.h>
 
 int c;
 int batteryCharge;
 int skjerm;
+
+U8GLIB_SSD1306_128X64 u8g(12, 11, 10, 9, 8);
 
 void receiveEvent(int howMany)
 {
@@ -71,6 +76,11 @@ void skjermValg(){
     {
     case 1:
         //Kjøpeskjerm
+        u8g.firstPage();
+        do{
+            u8g.drawStr( 1, 22, "Viva Canarias");
+            }while(u8g.nextPage());
+
         break;
 
     case 2: 
@@ -94,6 +104,8 @@ void setup(){
 
     Wire.begin(4);
     Wire.onReceive(receiveEvent); 
+    u8g.begin();
+    u8g.setFont(u8g_font_unifont);
 }
 
 void loop(){
