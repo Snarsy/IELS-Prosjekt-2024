@@ -63,10 +63,10 @@ int hexForIR_ElectricCar = 3292233855;
 
 int hexForIR_Array[spaceNumber] = {hexForIR_parkingSpace1 ,hexForIR_parkingSpace2, hexForIR_parkingSpace3 ,hexForIR_parkingSpace4};
 
-long lastSentIR = 0;
-
 int randomLedigPlass;
 int sisteSendtePlass;
+
+long lastSentIR = 0;
 
 bool firstIR = false;
 
@@ -156,12 +156,6 @@ void receiveEvent(int howMany){
     {
         availability = Wire.read();
     }
-    /*
-    Serial.print("parkingSpace: ");
-    Serial.print(parkingSpace);
-    Serial.print(" : ");
-    Serial.println(availability);
-    */
 }
 
 
@@ -174,7 +168,7 @@ void updateNumberOfSpots(){
                 lastParkingTimer = parkingTimer;
                 numberOfSpots += 1;
                 noSpotsAvailable = false;
-            if(randomLedigPlass == i && parkingTimer - lastParkingTimer > 20000){
+            if(randomLedigPlass == i && parkingTimer - lastParkingTimer > 30000){ //Dersom det har tatt 30sek siden siste plass ble sendt ut og det ikke står noen der
                 availabilityArray[i] = 1;
             }else{
                 availabilityArray[i] = 1;
@@ -230,9 +224,16 @@ void availabilityLEDs(){
 
 void IR_for_parking(){
 
+    //Fikk et IR-signal
     if(irrecv.decode(&results)){
 
-        if (results.value == 3292233855){
+        //Dersom ingen ledige plasser, si ifra til bil
+        if(results.value == 3292217535){
+            Serial.println("Access denied");
+            ir.sendNEC(hexForIR_noParking, 32);
+        }
+
+        else if (results.value == 3292233855){
 
             //Dersom ingen ledige plasser, si ifra til bil
             if(noSpotsAvailable){
@@ -248,40 +249,33 @@ void IR_for_parking(){
                     delay(20);
                 }
                 
+                //Sjekker alle parkeringsplasser og sjekker om de er ledige
                 for(int i = 0; i < spaceNumber; i++){
                     Serial.println(randomLedigPlass);
-                    if(availabilityArray[i] == 1 && sisteSendtePlass != i){
+                    if(availabilityArray[i] == 1 && sisteSendtePlass != i){ //Dersom plassen er ledig og ikke ble sendt ut sist, send ut signal
                         ir.sendNEC(hexForIR_Array[i], 32);
                         Serial.print("Sender: ");
                         Serial.println(i);
                         availabilityArray[i] = 0;
                         parkingTimer = millis();
                         randomLedigPlass = i;
-                        i = spaceNumber;
+                        i = spaceNumber; //avslutt for-løkken
                     }
                 }
-                sisteSendtePlass = randomLedigPlass; //Ikke send fler enn ett signal, og ikke send det siste sendte. 
+
+                //Ikke send fler enn ett signal, og ikke send det siste sendte. 
+                sisteSendtePlass = randomLedigPlass; 
                 delay(10000); //Venter til bilen har kjørt inn
                 Serial.println("Lukker!");
                 for(int posDegrees = 90; posDegrees > 0; posDegrees--) {
                     servo1.write(posDegrees);
                     delay(20);
-                }*/
+                }
 
             }
         } 
-        else if(results.value == 3292217535){
-            Serial.println("Access denied");
-            ir.sendNEC(hexForIR_noParking, 32);
-        }
 
-        irrecv.resume();  // Receive the next value
-
-        long now = millis();
-        if(now - lastSentIR > sleep_delay){
-            lastSentIR = now;
-            //esp_light_sleep_start();
-        }
+        irrecv.resume();  // Få neste IR-verdi
     }
 }
 
@@ -307,8 +301,6 @@ void setup(){
     ir.begin();
 
     //esp_sleep_enable_ext0_wakeup((gpio_num_t)IRRecievePin, 1);
-
-    randomSeed(analogRead(15));
 }
 
 
