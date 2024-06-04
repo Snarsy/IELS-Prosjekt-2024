@@ -3,7 +3,7 @@
 #include <SPI.h>
 #include <U8glib.h>
 
-int c;
+int wireCase;
 int batteryCharge = 0;
 int skjerm;
 
@@ -13,13 +13,13 @@ void receiveEvent(int howMany)
 {
   while(1 < Wire.available()) // loop through all but the last
   {
-    c = Wire.read(); // receive byte as a character
-    Serial.print(c);         // print the character
+    wireCase = Wire.read(); // receive byte as a character
+    Serial.print(wireCase);         // print the character
   }
 }
 
 void wireNumber(){
-    switch (c)
+    switch (wireCase)
     {
 
     case 0:
@@ -28,19 +28,19 @@ void wireNumber(){
     //MINKER BATTERILADNING // NED
     case 1:
         batteryCharge -= 10;
-        c = 0;
+        wireCase = 0;
         break;
 
     //ØKER BATTERILADING // OPP
     case 2:
         batteryCharge += 10;
-        c = 0;
+        wireCase = 0;
         break;
     
     //MAKS LADING NÅDD
     case 3:
         skjerm = 10;
-        c = 0;
+        wireCase = 0;
         break;
     
     //TILBAKE / NEI / AVBRYT // VENSTRE
@@ -51,7 +51,7 @@ void wireNumber(){
         else{
         skjerm -= 1;
         }
-        c = 0;
+        wireCase = 0;
         break;
 
     //VIDERE / JA / KJØP // HØYRE
@@ -62,7 +62,7 @@ void wireNumber(){
         else{
         skjerm += 1;
         }
-        c = 0;
+        wireCase = 0;
         break;
 
     default:
@@ -90,9 +90,34 @@ void skjermValg(){
         //Hjemskjerm
         u8g.firstPage();
         do{
-            String batteryString = String(batteryCharge);
             u8g.drawStr( 35, 10, "Ladeprosent");
-            u8g.drawStr( 60, 30, batteryString);
+            if(batteryCharge == 0){
+                u8g.drawStr( 60, 30, "0");
+            }
+            if(batteryCharge == 10){
+                u8g.drawStr( 60, 30, "10");
+            }
+            if(batteryCharge == 20){
+                u8g.drawStr( 60, 30, "20");
+            }
+            if(batteryCharge == 30){
+                u8g.drawStr( 60, 30, "30");
+            }
+            if(batteryCharge == 40){
+                u8g.drawStr( 60, 30, "40");
+            }
+            if(batteryCharge == 50){
+                u8g.drawStr( 60, 30, "50");    
+            }
+            if(batteryCharge == 60){
+                u8g.drawStr( 60, 30, "60");    
+            }
+            if(batteryCharge == 70){
+                u8g.drawStr( 60, 30, "70");
+            }
+            if(batteryCharge == 80){
+                u8g.drawStr( 60, 30, "80");
+            }
             u8g.drawStr(7, 60, "Avbryt");
             u8g.drawStr(100, 60, "Betal");
             }while(u8g.nextPage());
