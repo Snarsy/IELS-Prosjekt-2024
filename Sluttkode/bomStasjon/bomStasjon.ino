@@ -10,15 +10,14 @@ long lastSentIR = 0;
 
 void setup(){
     Serial.begin(9600);
-
-    ir.begin(IRPIN);
+    ir.begin(IRPIN); //Start IR-Pin
 }
 
 void IRSender(){
     long now = millis();
-    if(now - lastSentIR > IR_delay){
+    if(now - lastSentIR > IR_delay){ //Sender hvert 100ms. Hadde man ikke hatt delay hadde den sendt 0. 
         lastSentIR = now;
-        ir.sendNEC(hexForBom, 32);
+        ir.sendNEC(hexForBom, 32); //Sender IR
     }
 }
 

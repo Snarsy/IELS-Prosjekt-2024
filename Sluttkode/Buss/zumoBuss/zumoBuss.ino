@@ -32,12 +32,12 @@ void I2C_RxHandler(int numBytes)
  
 void setup() {
   lineSensors.initFiveSensors();
-  Wire.begin(0x55); // Initialize I2C (Slave Mode: address=0x55 )
+  Wire.begin(0x55); // Initijaliserer I2C (Slave Mode: address=0x55 )
   Wire.onReceive(I2C_RxHandler);
   Serial.begin(9600);
   display.setLayout21x8();
   display.clear();
-  turnSensorSetup();
+  turnSensorSetup(); //Kalibrarer linjesensorer
   delay(1000);
 }
 
