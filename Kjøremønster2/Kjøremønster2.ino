@@ -9,6 +9,7 @@ Zumo32U4LineSensors lineSensors;
 Zumo32U4ProximitySensors proxSensors;
 Zumo32U4IRPulses irSensors;
 Zumo32U4IMU imu;
+Zumo32U4Encoders encoder;
 #include "TurnSensor.h"
 
 //For ir sender
@@ -29,10 +30,10 @@ IRrecv IR(IRPin);
 int prevcase;
 int driveOverNum = 0;
 unsigned long prevmillis = 0;
-int caseNum = 1;
 int linelength = 400;
 bool doDrive = 0;
 
+int caseNum = 5;
 int destination = 4;
 int currentPosition = 0;
 int clockWise = 1;
@@ -60,6 +61,39 @@ int housenumber = 2;
 //Outsider
 int outsidercounter = 0; // Setter man denne til 3 og caseNum til 5 så vil bilen være klar for å starte ved huset utenfor byen.
 unsigned long outsidermillis;
+
+// Batterinivå
+unsigned long previousSpeedMillis = 0;
+int speedDistance, totalDistance = 0;
+int A = 1;
+int16_t firstSpeed, totalSpeed = 0;
+int readTime = 100;
+int speed = 100;
+int lastspeed = 0;
+int batterylevel;
+
+void batterycheck() // Måler fart hvert 10.dels sekund. Siden readtime = 100.
+{
+    unsigned long speedMillis = millis();
+    if (A == 1)
+    {
+        firstSpeed = encoder.getCountsLeft() + encoder.getCountsRight();
+        A = 0;
+    }
+    if (speedMillis - previousSpeedMillis > readTime)
+    {
+        int16_t lastSpeed = encoder.getCountsLeft() + encoder.getCountsRight();
+        A = 1;
+        previousSpeedMillis = speedMillis;
+        totalSpeed = abs((lastSpeed - firstSpeed) / 909.70 * 10.996 * 4); // Verdiene er regnet med hvor mange ganger den teller og areal av hjulet.
+        speedDistance += totalSpeed / 10; // Deler på 10 siden den teller hvert 1/10 sekund.
+    }
+    batterylevel = 100 - speedDistance/5;
+
+    if(batterylevel < 30){
+        destination = 6; //Setter denne til ladestasjon slik at bilen vil kjøre dit for å lade.
+    }
+}
 
 void driveOverLine(){//Funksjon til for å kjøre over linje
     switch (driveOverNum){
@@ -378,7 +412,6 @@ void driving(){// Funksjon for kjøringen rundt i byen
                 }
                 if(millis()%5==0){
                     display.clear();
-                    display.print(currentPosition);
                 }
                 if(aboveAll()){     // Treffer bilen et kryss vil den stoppe og kjøre over for så å oppdatere plasseringen.
                     prevcase = caseNum;
@@ -393,7 +426,7 @@ void driving(){// Funksjon for kjøringen rundt i byen
                 }
                 if(currentPosition == destination){//Hvis bilen er på riktig plass vil den rotere 90 grader og bytte til kjøremønsteret for destinasjonen.
                     prevmillis = millis();
-                    if(destination == 10){//I dette tilfellet er destination = 3, garasjen.
+                    if(destination == 10){//Garasje
                         caseNum = 2;
                     }
                     else if(destination == 6){
@@ -434,4 +467,10 @@ void setup(){
 void loop(){
     driving();
     tollGate();
+    batterycheck();
+    if(millis()%50==0){
+        display.clear();
+        display.println(currentPosition);
+        display.print(batterylevel);
+    }
 }
