@@ -61,11 +61,13 @@ void skjermValg(){
     {
     case 1:
         //Kjøpeskjerm
-
         break;
+
+    case 2: 
+        
     
     //FOR HØY STRØM
-    case 3:
+    case 10:
         //Skriv maks ladning nådd
 
         delay(3000);
