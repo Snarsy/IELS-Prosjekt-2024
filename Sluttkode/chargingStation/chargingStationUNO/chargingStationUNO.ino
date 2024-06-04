@@ -5,7 +5,7 @@
 
 int wireCase;
 int batteryCharge = 0;
-int skjerm;
+int skjerm = 1;
 
 U8GLIB_SSD1306_128X64 u8g(12, 11, 10, 9, 8);
 
@@ -45,8 +45,8 @@ void wireNumber(){
     
     //TILBAKE / NEI / AVBRYT // VENSTRE
     case 11:
-        if(skjerm == 1){
-            skjerm = 3;
+        if(skjerm == 0){
+            skjerm = 1;
         }
         else{
         skjerm -= 1;
@@ -56,12 +56,7 @@ void wireNumber(){
 
     //VIDERE / JA / KJØP // HØYRE
     case 12:
-        if(skjerm == 3){
-            skjerm = 1;
-        }
-        else{
         skjerm += 1;
-        }
         wireCase = 0;
         break;
 
@@ -74,6 +69,17 @@ void wireNumber(){
 void skjermValg(){
     switch (skjerm)
     {
+    case 0:
+        //Avbryt
+        u8g.firstPage();
+        do{
+            u8g.drawStr( 35, 35, "Avbryt");
+            }while(u8g.nextPage());
+
+        break;
+    
+    
+    
     case 1:
         //Hjemskjerm
         u8g.firstPage();
@@ -131,6 +137,8 @@ void skjermValg(){
             u8g.drawStr( 35, 35, "ferdig");
             u8g.drawStr( 35, 60, "Hade:)");
             }while(u8g.nextPage());
+        delay(3000);
+        skjerm = 1;
 
         break;
 
