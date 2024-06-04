@@ -31,11 +31,10 @@ int availability_spot1 , availability_spot2, availability_spot3, availability_sp
 int availabilityArray[spaceNumber] = {availability_spot1, availability_spot2, availability_spot3, availability_spot4};
 
 long lastMsg = 0;
-
-bool noSpotsAvailable = false;
-
 long parkingTimer;
 long lastParkingTimer;
+
+bool noSpotsAvailable = false;
 
 
 // LED-pins
@@ -59,21 +58,20 @@ const int hexForIR_parkingSpace2 = 0x12345678;
 const int hexForIR_parkingSpace3 = 0x98765432;
 const int hexForIR_parkingSpace4 = 0xABCDEF01;
 const int hexForIR_noParking = 0x87654321;
-int hexForIR_ElectricCar = 3292233855;
+const int hexForIR_ElectricCar = 3292233855;
 
 int hexForIR_Array[spaceNumber] = {hexForIR_parkingSpace1 ,hexForIR_parkingSpace2, hexForIR_parkingSpace3 ,hexForIR_parkingSpace4};
 
 int randomLedigPlass;
 int sisteSendtePlass;
 
-long lastSentIR = 0;
-
-bool firstIR = false;
 
 //Servo-variabler
 
 static const int servoPin = 4;
 
+
+//Biblioteksinitiering
 IRsend ir(IRPin);
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -124,6 +122,15 @@ void reconnect() {
     }   
 }
 
+void clientell(){
+
+    //Kobler ESP på WiFi
+    if (!client.connected()) {
+        reconnect();
+    }
+    client.loop();
+}
+
 
 void sendParkInfo(){
     long now = millis();
@@ -164,7 +171,11 @@ void updateNumberOfSpots(){
     int numberOfSpots = 0;
     for(int i = 0; i < spaceNumber; i++){
 
-        if(digitalRead(ledPinArray[i]) == HIGH){
+        if(digitalRead(ledPinArray[i]) == LOW){
+            availabilityArray[i] = 0;
+        }
+
+        else if(digitalRead(ledPinArray[i]) == HIGH){
                 lastParkingTimer = parkingTimer;
                 numberOfSpots += 1;
                 noSpotsAvailable = false;
@@ -173,9 +184,6 @@ void updateNumberOfSpots(){
             }else{
                 availabilityArray[i] = 1;
                 }
-        }
-        else if(digitalRead(ledPinArray[i]) == LOW){
-            availabilityArray[i] = 0;
         }
     }
 
@@ -192,7 +200,6 @@ void updateNumberOfSpots(){
 
 
 // LED-Styring
-
 
 void availabilityLEDs(){
     switch (parkingSpace)
@@ -271,10 +278,8 @@ void IR_for_parking(){
                     servo1.write(posDegrees);
                     delay(20);
                 }
-
             }
         } 
-
         irrecv.resume();  // Få neste IR-verdi
     }
 }
@@ -283,36 +288,36 @@ void IR_for_parking(){
 
 
 void setup(){
+    //Seriell kommunikasjon
     Serial.begin(9600);
-    servo1.attach(servoPin);
+
+    //Pins
     pinMode(ledPin_1, OUTPUT);
     pinMode(ledPin_2, OUTPUT);
     pinMode(ledPin_3, OUTPUT);
     pinMode(ledPin_4, OUTPUT);
-    //pinMode(IRRecievePin, INPUT);
 
+    //Servo
+    servo1.attach(servoPin);
+
+    //I2C-kommunikasjon
     Wire.begin(2);
     Wire.onReceive(receiveEvent);
 
+    //Wifi-setup
     setup_wifi();
     client.setServer(mqtt_server, 1883);
 
+    //IR-setup
     irrecv.enableIRIn();
     ir.begin();
-
-    //esp_sleep_enable_ext0_wakeup((gpio_num_t)IRRecievePin, 1);
 }
 
 
 void loop(){ 
-    
-    if (!client.connected()) {
-        reconnect();
-    }
-    client.loop();
+    clientell();
     availabilityLEDs();
     updateNumberOfSpots();
     IR_for_parking();
-    sendParkInfo();
-    
+    sendParkInfo();   
 }
