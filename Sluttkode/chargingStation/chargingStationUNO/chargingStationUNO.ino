@@ -4,7 +4,7 @@
 #include <U8glib.h>
 
 int c;
-int batteryCharge;
+int batteryCharge = 0;
 int skjerm;
 
 U8GLIB_SSD1306_128X64 u8g(12, 11, 10, 9, 8);
@@ -78,17 +78,34 @@ void skjermValg(){
         //Kjøpeskjerm
         u8g.firstPage();
         do{
-            u8g.drawStr( 1, 22, "Viva Canarias");
+            u8g.drawStr( 35, 22, "Godkjenn");
+            u8g.drawStr( 35, 35, "betaling");
+            u8g.drawStr( 7, 60, "Nei");
+            u8g.drawStr( 100, 60, "Ja");
             }while(u8g.nextPage());
 
         break;
 
     case 2: 
-        
+        //Hjemskjerm
+        u8g.firstPage();
+        do{
+            String batteryString = String(batteryCharge);
+            u8g.drawStr( 35, 10, "Ladeprosent");
+            u8g.drawStr( 60, 30, batteryString);
+            u8g.drawStr(7, 60, "Avbryt");
+            u8g.drawStr(100, 60, "Betal");
+            }while(u8g.nextPage());
     
     //FOR HØY STRØM
     case 10:
         //Skriv maks ladning nådd
+        u8g.firstPage();
+        do{
+            u8g.drawStr( 35, 10, "Maks");
+            u8g.drawStr( 60, 10, "lading");
+            
+            }while(u8g.nextPage());
 
         delay(3000);
         skjerm = 1;
@@ -114,12 +131,12 @@ void loop(){
 }
 
 
-#include <Arduino.h>
+/*#include <Arduino.h>
 #include <SPI.h>
 #include "U8glib.h" // include the universal graphcs library
 
 //U8G2_SSD1306_128X64_NONAME_1_4W_SW_SPI display(U8G2_R0, /* clock=/ 13, / data=/ 11, / cs=/ 10, / dc=/ 9, / reset=*/ 8);
-int batteryCharge;
+/*int batteryCharge;
  
 U8GLIB_SSD1306_128X64 u8g(12, 11, 10, 9, 8);    // initialise a u8g display object
 //clk = 12, mosi = 11, cs = 10, dc = 9, res = 8.  på arduino
@@ -146,5 +163,5 @@ void skjerm(){
 
 void loop() {
   skjerm();
-}
+}*/
 //Fjern neopixel
