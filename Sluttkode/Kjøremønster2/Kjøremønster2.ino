@@ -61,7 +61,7 @@ int housenumber = 2;
 int outsidercounter = 0; // Setter man denne til 3 og caseNum til 5 så vil bilen være klar for å starte ved huset utenfor byen.
 unsigned long outsidermillis;
 
-// Batterinivå
+// Batterinivå/akselerometer
 unsigned long previousSpeedMillis = 0;
 int speedDistance, totalDistance = 0;
 int A = 1;
@@ -70,6 +70,8 @@ int readTime = 100;
 int speed = 100;
 int lastspeed = 0;
 int batterylevel;
+int prevSpeed;
+int accelerometer;
 #include "DriveLib.h"
 
 void driveOverLine(){//Funksjon til for å kjøre over linje
@@ -447,7 +449,6 @@ void loop(){
     batterycheck();
     if(millis()%50==0){
         display.clear();
-        display.println(currentPosition);
-        display.print(batterylevel);
+        display.println(accelerometer);
     }
 }
