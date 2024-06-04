@@ -22,13 +22,13 @@ void wireNumber(){
 
     //MINKER BATTERILADNING // NED
     case 1:
-        batteryCharge -= 1;
+        batteryCharge -= 10;
         c = 0;
         break;
 
     //ØKER BATTERILADING // OPP
     case 2:
-        batteryCharge += 1;
+        batteryCharge += 10;
         c = 0;
         break;
     
@@ -55,16 +55,6 @@ void wireNumber(){
     }
 }
 
-void batteryCharging(){
-    switch (batteryCharge)
-    {
-    case 
-        break;
-    
-    default:
-        break;
-    }
-}
 
 void skjermValg(){
     switch (skjerm)
