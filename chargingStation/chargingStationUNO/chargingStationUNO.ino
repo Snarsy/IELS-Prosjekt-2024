@@ -40,13 +40,23 @@ void wireNumber(){
     
     //TILBAKE / NEI / AVBRYT // VENSTRE
     case 11:
+        if(skjerm == 1){
+            skjerm = 3;
+        }
+        else{
         skjerm -= 1;
+        }
         c = 0;
         break;
 
     //VIDERE / JA / KJØP // HØYRE
     case 12:
+        if(skjerm == 3){
+            skjerm = 1;
+        }
+        else{
         skjerm += 1;
+        }
         c = 0;
         break;
 
@@ -88,6 +98,5 @@ void setup(){
 
 void loop(){
     wireNumber();
-    batteryCharging();
     skjermValg();
 }
