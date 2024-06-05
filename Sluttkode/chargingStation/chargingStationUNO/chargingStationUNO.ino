@@ -2,12 +2,25 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <U8glib.h>
+#include <IRsend.h>
 
 int wireCase;
 int batteryCharge = 0;
 int skjerm = 1;
 
+//IR-variabler
+const int hexForIR_howMuchCharge0 = 0x11111111;
+const int hexForIR_howMuchCharge1 = 0x11111112;
+const int hexForIR_howMuchCharge2 = 0x11111122;
+const int hexForIR_howMuchCharge3 = 0x11111222;
+const int hexForIR_howMuchCharge4 = 0x11112222;
+const int hexForIR_howMuchCharge5 = 0x11122222;
+const int hexForIR_howMuchCharge6 = 0x11222222;
+const int hexForIR_howMuchCharge7 = 0x12222222;
+const int hexForIR_howMuchCharge8 = 0x22222222;
+
 U8GLIB_SSD1306_128X64 u8g(12, 11, 10, 9, 8);
+IRsend irsend(IRPin);
 
 void receiveEvent(int howMany)
 {
@@ -47,12 +60,11 @@ void wireNumber(){
     case 11:
         if(skjerm == 0){
             skjerm = 1;
+            batteryCharge = 0;
+            
         }
         if(skjerm == 1 || skjerm == 2){
             skjerm -= 1;
-        }
-        if(skjerm == 3){
-            skjerm = 3;
         }
 
         wireCase = 0;
@@ -63,9 +75,6 @@ void wireNumber(){
         if(skjerm == 0 || skjerm == 1 || skjerm == 2){
             skjerm += 1;
         }
-        if(skjerm == 3){
-            skjerm = 3;
-        }   
         wireCase = 0;
         break;
 
@@ -83,6 +92,8 @@ void skjermValg(){
         u8g.firstPage();
         do{
             u8g.drawStr( 35, 35, "Avbryt");
+                u8g.drawStr( 7, 60, "Ja");
+                u8g.drawStr( 100, 60, "Nei");
             }while(u8g.nextPage());
 
         break;
@@ -146,9 +157,11 @@ void skjermValg(){
             u8g.drawStr( 35, 35, "ferdig");
             u8g.drawStr( 35, 60, "Hade:)");
             }while(u8g.nextPage());
+        sendCharge();
         delay(3000);
         skjerm = 1;
-
+        batteryCharge = 50;
+    
         break;
 
     
@@ -171,6 +184,43 @@ void skjermValg(){
     }
 }
 
+void sendCharge(){
+  if(batteryCharge == 0){
+    irsend.sendNEC(hexForIR_howMuchCharge0, 32);
+  }
+  
+  if(batteryCharge == 10){
+    irsend.sendNEC(hexForIR_howMuchCharge1, 32); //Send til addresse og command.
+  }
+  
+  if(batteryCharge == 20){
+    irsend.sendNEC(hexForIR_howMuchCharge2, 32);
+  }
+  
+  if(batteryCharge == 30){
+    irsend.sendNEC(hexForIR_howMuchCharge3, 32);
+  }
+
+  if(batteryCharge == 40){
+    irsend.sendNEC(hexForIR_howMuchCharge4, 32);
+  }
+
+  if(batteryCharge == 50){
+    irsend.sendNEC(hexForIR_howMuchCharge5, 32);
+  }
+
+  if(batteryCharge == 60){
+    irsend.sendNEC(hexForIR_howMuchCharge6, 32);
+  }
+
+  if(batteryCharge == 70){
+    irsend.sendNEC(hexForIR_howMuchCharge7, 32);
+  }
+
+  if(batteryCharge == 80){
+    irsend.sendNEC(hexForIR_howMuchCharge8, 32);
+  }
+}
 
 void setup(){
     Serial.begin(9600);
