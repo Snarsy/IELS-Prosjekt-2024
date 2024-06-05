@@ -3,7 +3,7 @@ void calibrateSensors()
   display.clear();
   delay(1000);
   motors.setSpeeds(200,-200);
-  while(millis()<2600){
+  while(millis()<2300){
     lineSensors.calibrate();
   }
   motors.setSpeeds(0, 0);
@@ -11,7 +11,7 @@ void calibrateSensors()
 
 void turndeg(int tilverdi){
     unsigned long turnmillis = millis();
-    while(millis()-turnmillis<1200){
+    while(millis()-turnmillis<1000){
         if(tilverdi == 90){
             motors.setSpeeds(100,-100);
         }
@@ -22,6 +22,7 @@ void turndeg(int tilverdi){
             motors.setSpeeds(150,-150);
         }
     }
+    motors.setSpeeds(0,0);
 }
 
 const uint8_t numSensors = 5;
@@ -34,11 +35,12 @@ uint16_t readSensors()
 
 bool aboveLine(uint8_t sensorIndex)
 {
+    readSensors();
     return lineSensorValues[sensorIndex] > sensorThreshold;
 }
 
 
-int followLinemaxSpeed = 350;
+int followLinemaxSpeed = 200;
 int lastError = 0;
 void driveLinePID()
 { //Linjefølging tatt fra Kevin Pololu. 
@@ -56,6 +58,14 @@ void driveLinePID()
     motors.setSpeeds(leftSpeed, rightSpeed);
 }
 
+bool aboveAll(){
+    if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4)){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
 bool aboveRight(){
     if(aboveLine(3) && aboveLine(4)){
         return true;
@@ -72,14 +82,7 @@ bool aboveLeft(){
         return false;
     }
 }
-bool aboveAll(){
-    if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4)){
-        return true;
-    }
-    else{
-        return false;
-    }
-}
+
 
 void batterycheck() // Måler fart hvert 10.dels sekund. Siden readtime = 100.
 {

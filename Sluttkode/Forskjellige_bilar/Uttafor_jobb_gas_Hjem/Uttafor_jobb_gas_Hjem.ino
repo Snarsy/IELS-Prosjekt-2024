@@ -94,7 +94,7 @@ void driveOverLine(){//Funksjon til for å kjøre over linje
 
 void irDecodeGarasje(){ // Decoder ir signaler bilen får og setter verdier til hvor bilen skal kjøre i garasjen.
     if(buttonC.isPressed()){
-        parkingAvailable = 3;
+        parkingAvailable = 4;
     }
     if (IR.decode())
     {
@@ -134,12 +134,10 @@ void garage(){// Funksjon for kjøringen i garasjen
                 if(!clockWise){turndeg(90);};
                 prevcase = caseNum;
                 caseNum = 0;
-                linelength = 300;// Lengden bilen kjører over må være samme tall som i linje 76. Dette er slik at den ikke kjører lengre enn den skal.
                 haveturned = !haveturned;
                 break;
             }
             motors.setSpeeds(0,0);
-            linelength = 200;//Hvor mange millisekunder zumo'n skal kjøre over en linje
             irDecodeGarasje();
             if(millis()-prevmillis>5000){
                 ZumoIrSender.send(1);
@@ -154,7 +152,7 @@ void garage(){// Funksjon for kjøringen i garasjen
         case 1:// Her er det en rekke tilfeller. Sjekker om bilen er ved linje hvor den vil kjøre over. Deretter kjører den inn eller over krysset.
         followLinemaxSpeed = 200;
             readSensors();
-            if(aboveAll() && currentPosGarage < 8){//Hvis den treffer et kryss og er på riktig plass i garasjen vil den snu 180 grader og bytte til case 2 hvor den står i ro.
+            if(aboveAll() && currentPosGarage<8){//Hvis den treffer et kryss og er på riktig plass i garasjen vil den snu 180 grader og bytte til case 2 hvor den står i ro.
                 prevmillis = millis();
                 if(parkingAvailable == 1){// Hvis den ikke får parkere ved at det ikke er plass vil den kjøre over linjen og bytte til case 3.
                     caseNumGarage = 3;
@@ -357,7 +355,7 @@ void outsider(){
         destination = 10;
         turndeg(90);
     }
-    if(millis()-outsidermillis>10000 && outsidercounter == 3){
+    if(millis()-outsidermillis>5000 && outsidercounter == 3){
         driveLinePID();
         if(aboveAll()){
             outsidercounter = 2; // Sier at bilen skal til garasjen fra hjemme.

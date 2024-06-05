@@ -11,7 +11,7 @@ void calibrateSensors()
 
 void turndeg(int tilverdi){
     unsigned long turnmillis = millis();
-    while(millis()-turnmillis<1200){
+    while(millis()-turnmillis<1400){
         if(tilverdi == 90){
             motors.setSpeeds(100,-100);
         }
