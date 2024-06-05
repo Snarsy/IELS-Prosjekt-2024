@@ -173,7 +173,7 @@ void skjermValg(){
 
 
 void setup(){
-
+    Serial.begin(9600);
     Wire.begin(4);
     Wire.onReceive(receiveEvent); 
     u8g.begin();
@@ -183,4 +183,5 @@ void setup(){
 void loop(){
     wireNumber();
     skjermValg();
+    Serial.println(wireCase);
 }

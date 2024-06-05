@@ -12,11 +12,7 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 Adafruit_APDS9960 apds;
 
-//definerer for å bruke wire fra esp til arduino også
-#define I2C_SDA 33
-#define I2C_SCL 32
 
-TwoWire I2CAPDS = TwoWire(0);
 
 // MQTT-variabler
 
@@ -59,6 +55,7 @@ void setup() {
     apds.enableProximity(true);
     apds.enableGesture(true);
 
+  
     //IR-setup
     irsend.begin();
 
@@ -74,42 +71,29 @@ void batterygestures(){
 
   if(gesture == APDS9960_DOWN){
     batteryCharge -= 10;
+    Serial.println("1");
 
-    Wire.beginTransmission(4); // transmit to device #4
-    Wire.write("1");
-    Wire.endTransmission();
   }
 
   if(gesture == APDS9960_UP){
     if(maxCharge == batteryCharge){
-
-      Wire.beginTransmission(4); // transmit to device #4
-      Wire.write("3");
-      Wire.endTransmission();
+      Serial.println("3");
       delay(3000);
     } else{
       batteryCharge += 10;
-
-      Wire.beginTransmission(4); // transmit to device #4
-      Wire.write("2");
-      Wire.endTransmission();  
+      Serial.println("2");
     } 
   } 
 
   if(gesture == APDS9960_LEFT){
     transactionCaseNumber = 1;
+    Serial.print("11");
 
-    Wire.beginTransmission(4); // transmit to device #4
-    Wire.write("11");
-    Wire.endTransmission();
   } 
 
   if(gesture == APDS9960_RIGHT){
     transactionCaseNumber = 2;
-
-    Wire.beginTransmission(4); // transmit to device #4
-    Wire.write("12");
-    Wire.endTransmission();
+    Serial.print("12");
   } 
 }
 
@@ -119,10 +103,7 @@ void doyouwanttocancel(){
 
   if (gesture == APDS9960_LEFT){
     transactionCaseNumber = 0;
-
-    Wire.beginTransmission(4); // transmit to device #4
-    Wire.write("11");
-    Wire.endTransmission();
+    Serial.println("11");
   }
 
   if (gesture == APDS9960_RIGHT){
@@ -141,7 +122,7 @@ void doyouwanttobuy(){
 
   if (gesture == APDS9960_LEFT){
     transactionCaseNumber = 0;
-
+    Serial.print("Left!");
     Wire.beginTransmission(4); // transmit to device #4
     Wire.write("11");
     Wire.endTransmission();
@@ -149,7 +130,7 @@ void doyouwanttobuy(){
 
   if (gesture == APDS9960_RIGHT){
     transactionCaseNumber = 3;
-
+    Serial.print("RIght!");
     Wire.beginTransmission(4); // transmit to device #4
     Wire.write("12");
     Wire.endTransmission();
@@ -295,7 +276,11 @@ void loop() {
   if (!client.connected()) {
         reconnect();
   }
-  client.loop();  
-  
-  transactionCase();
+  client.loop(); 
+
+  //transactionCase();
+  Serial.println(1);
+
 }
+
+
