@@ -5,13 +5,13 @@
 #include <IRremoteESP8266.h>
 #include <IRsend.h>
 
+const int IRPin = 32;
 
 IRsend irsend(IRPin);
 WiFiClient espClient;
 PubSubClient client(espClient);
 Adafruit_APDS9960 apds;
 
-U8GLIB_SSD1306_128X64 u8g(12, 11, 10, 9, 8);
 
 // MQTT-variabler
 
@@ -33,7 +33,6 @@ const int hexForIR_howMuchCharge6 = 0x11222222;
 const int hexForIR_howMuchCharge7 = 0x12222222;
 const int hexForIR_howMuchCharge8 = 0x22222222;
 
-const uint16_t IRPin = 32;  // ESP32 pin GPIO 32
 
 
 //Batteri-variabler
@@ -66,20 +65,6 @@ void setup() {
 
 void batterygestures(){
 
-  display.clear();
-  display.gotoXY(5, 1);
-  display.print("Ladeprosent");
-  display.gotoXY(5, 4);
-  display.print(batteryCharge);
-  display.gotoXY(1, 6);
-  display.print("Venstre")
-  display.gotoXY(1, 7);
-  display.print("Avbryt");
-  display.gotoXY(16, 6);
-  display.print("Høyre");
-  display.gotoXY(16, 7);
-  display.print("Kjøp");
-
   uint8_t gesture = apds.readGesture();
 
   if(gesture == APDS9960_DOWN){
@@ -92,13 +77,6 @@ void batterygestures(){
 
   if(gesture == APDS9960_UP){
     if(maxCharge == batteryCharge){
-      display.clear();
-      display.gotoXY(5,1);
-      display.print("Maksimalt");
-      display.gotoXY(5,4);
-      display.print("ladingsnivå");
-      display.gotoXY(10,7);
-      display.print("nådd!")
 
       Wire.beginTransmission(4); // transmit to device #4
       Wire.write("3");
@@ -132,18 +110,6 @@ void batterygestures(){
 
 void doyouwanttocancel(){
 
-  display.clear();
-  display.gotoXY(2,1);
-  display.print("Vil du avbryte?")
-  display.gotoXY(1, 6);
-  display.print("Venstre")
-  display.gotoXY(2, 7);
-  display.print("Nei");
-  display.gotoXY(16, 6);
-  display.print("Høyre");
-  display.gotoXY(18, 7);
-  display.print("Ja");
-
   uint8_t gesture = apds.readGesture();
 
   if (gesture == APDS9960_LEFT){
@@ -155,10 +121,6 @@ void doyouwanttocancel(){
   }
 
   if (gesture == APDS9960_RIGHT){
-    display.clear();
-    display.gotoXY(8,3);
-    display.print("Hade!");
-    delay(2000);
     batteryCharge = 0;
     transactionCaseNumber = 3;
     
@@ -169,18 +131,6 @@ void doyouwanttocancel(){
 }
 
 void doyouwanttobuy(){
-
-  display.clear();
-  display.gotoXY(5,1);
-  display.print("Godkjenn kjøpet");
-  display.gotoXY(1,6);
-  display.print("Venstre");
-  display.gotoXY(2,7);
-  display.print("Nei");
-  display.gotoXY(16,6);
-  display.print("Høyre");
-  display.gotoXY(18, 7);
-  display.print("Ja");
 
   uint8_t gesture = apds.readGesture();
 
