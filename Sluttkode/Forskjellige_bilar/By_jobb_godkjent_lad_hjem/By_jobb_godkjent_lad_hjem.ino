@@ -40,9 +40,9 @@ int clockWise = 0;
 
 //LadeStasjon
 int chargePrevMillis;
-int howMuchCharge = 1;  //kun for å teste uten ir signal
-int charged = 0;
-bool haveturned = 1;
+int howMuchCharge = -1;  //kun for å teste uten ir signal
+bool haveturned = 0;
+int chargecounter = 0;
 
 //Garasjen
 int parkingAvailable = 0;//Har nummeret 10 fram til bilen får ledig plass.
@@ -113,7 +113,6 @@ void irDecodeGarasje(){ // Decoder ir signaler bilen får og setter verdier til 
 
 void irDecodeCharge(){
     if (IR.decode()){
-      Serial.println(IR.decodedIRData.decodedRawData);
         if (IR.decodedIRData.decodedRawData == 2290649224)     howMuchCharge = 1; //10
         if (IR.decodedIRData.decodedRawData == 1216907400)     howMuchCharge = 2; //20
         if (IR.decodedIRData.decodedRawData == 1149798536)     howMuchCharge = 3; //30
@@ -217,88 +216,77 @@ void garage(){// Funksjon for kjøringen i garasjen
 }
 
 void chargingStation(){// Funksjon for når bilen kjører inn til ladestasjonen
+    if(buttonC.isPressed()){
+        howMuchCharge = 1;
+    }
     followLinemaxSpeed = 200;
+    if(doDrive == 1){
+        driveLinePID();
+    }
     if(!haveturned){//Her må det være mindre enn samme verdi som 81.
         if(clockWise) turndeg(90);
         if(!clockWise) turndeg(-90);
         doDrive = 1;
         haveturned = !haveturned;
     }
-    if(doDrive == 1){
-        driveLinePID();
-    }
-    
-    //irDecodeBensin();   //trenger ikke denne?
-    //chargePrevMillis = millis();  //denne tror jeg er feil satt her
-    if (aboveAll() && charged != 1){
+    if (aboveAll() && chargecounter == 0){
         motors.setSpeeds(0,0);
         doDrive = 0;
         if(clockWise) turndeg(90);
         if(!clockWise) turndeg(-90);
-        chargePrevMillis = millis();
-        irDecodeCharge();
+        chargecounter = chargecounter + 1;
+    }
+    irDecodeCharge();
+    display.gotoXY(3,3);
+    if(howMuchCharge == 0){
         display.clear();
-        display.gotoXY(3,3);
-        
-        if(howMuchCharge == 0){
-            display.print("Lading avbrutt");
-        }
-
-        if(howMuchCharge == 1){
-            display.print("Lading: +10%");
-        }
-
-        if(howMuchCharge == 2){
-            display.print("Lading: +20%");
-        }
-
-        if(howMuchCharge == 3){
-            display.print("Lading: +30%");
-        }
-
-        if(howMuchCharge == 4){
-            display.print("Lading: +40%");
-        }
-
-        if(howMuchCharge == 5){
-            display.print("Lading: +50%");
-        }
-
-        if(howMuchCharge == 6){
-            display.print("Lading: +60%");
-        }
-
-        if(howMuchCharge == 7){
-            display.print("Lading: +70%");
-        }
-
-        if(howMuchCharge == 8){
-            display.print("Lading: +80%");
-        }
-    }  
-    if ((millis() - chargePrevMillis) > 3000 && (millis() - chargePrevMillis) < 3100){
+        display.print("Lading avbrutt");
+    }
+    if(howMuchCharge == 1){
+        display.print("Lading: +10%");
+    }
+    if(howMuchCharge == 2){
+        display.print("Lading: +20%");
+    }
+    if(howMuchCharge == 3){
+        display.print("Lading: +30%");
+    }
+    if(howMuchCharge == 4){
+        display.print("Lading: +40%");
+    }
+    if(howMuchCharge == 5){
+        display.print("Lading: +50%");
+    }
+    if(howMuchCharge == 6){
+        display.print("Lading: +60%");
+    }
+    if(howMuchCharge == 7){
+        display.print("Lading: +70%");
+    }
+    if(howMuchCharge == 8){
+        display.print("Lading: +80%");
+    }
+    if(howMuchCharge!=-1){
+        howMuchCharge = -1;
+        chargecounter = chargecounter + 1;
+        chargePrevMillis = millis();
+    }
+    if ((millis()-chargePrevMillis)>3000 && (millis()-chargePrevMillis)<3100){
         display.clear();
         if(clockWise) turndeg(-90);
         if(!clockWise) turndeg(90);
         prevcase = caseNum;
         caseNum = 0;
-        charged = 1;
-            //if(clockWise) turndeg(-90);
-            //if(!clockWise) turndeg(90);
         doDrive = 1;
-        destination = 4;
     }
-    
-
-
-
-    if(aboveAll() && charged == 1){
-        prevcase = caseNum;
-        caseNum = 0;
+   if(aboveAll() && chargecounter > 2){
         if(clockWise) turndeg(90);
         if(!clockWise) turndeg(-90);
-        doDrive = 1;
-    }
+        caseNum = 1;
+        destination = 4;
+        currentPosition = 5;
+        haveturned = 0;
+   }
 }
 
 
@@ -400,9 +388,6 @@ void driving(){// Funksjon for kjøringen rundt i byen
                 else if(currentPosition == -1 && !clockWise){
                     currentPosition = 10;
                 }
-                if(millis()%5==0){
-                    display.clear();
-                }
                 if(aboveAll()){     // Treffer bilen et kryss vil den stoppe og kjøre over for så å oppdatere plasseringen.
                     prevcase = caseNum;
                     caseNum = 0;
@@ -452,6 +437,7 @@ void setup(){
     Serial.begin(115200);
     calibrateSensors();
     prevmillis, outsidermillis = 0;
+    display.setLayout21x8();
 }
 
 void loop(){
@@ -460,6 +446,6 @@ void loop(){
     batterycheck();
     if(millis()%50==0){
         display.clear();
-        display.println(currentPosGarage);
+        display.println(currentPosition);
     }
 }

@@ -11,7 +11,7 @@ void calibrateSensors()
 
 void turndeg(int tilverdi){
     unsigned long turnmillis = millis();
-    while(millis()-turnmillis<1200){
+    while(millis()-turnmillis<1000){
         if(tilverdi == 90){
             motors.setSpeeds(100,-100);
         }
@@ -35,6 +35,7 @@ uint16_t readSensors()
 
 bool aboveLine(uint8_t sensorIndex)
 {
+    readSensors();
     return lineSensorValues[sensorIndex] > sensorThreshold;
 }
 
@@ -58,6 +59,7 @@ void driveLinePID()
 }
 
 bool aboveRight(){
+    readSensors();
     if(aboveLine(3) && aboveLine(4)){
         return true;
     }
@@ -66,6 +68,7 @@ bool aboveRight(){
     }
 }
 bool aboveLeft(){
+    readSensors();
     if(aboveLine(0) && aboveLine(2)){
         return true;
     }
@@ -74,6 +77,7 @@ bool aboveLeft(){
     }
 }
 bool aboveAll(){
+    readSensors();
     if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4)){
         return true;
     }
