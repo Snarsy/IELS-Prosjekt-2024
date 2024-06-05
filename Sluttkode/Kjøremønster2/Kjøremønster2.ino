@@ -52,6 +52,7 @@ int currentPosGarage = 0;
 //Bompenger
 unsigned long BompreviousMillis = 0; // Store the last time the IR sensor was triggered
 const long Bominterval = 10000; // 10 seconds interval
+int tollgatepassings = 0;
 
 //Nabolag
 int housecounter = 0;
@@ -371,6 +372,8 @@ void tollGate(){ //Tar imot bompenger, denne må være bare om det er dieselbil
 
                 //Spiller G4
                 buzzer.playFrequency(392, 250, 15);
+
+                tollgatepassings += 1; //Registrer antall ganger den passerer bomstasjonen.
             }
         }
     }

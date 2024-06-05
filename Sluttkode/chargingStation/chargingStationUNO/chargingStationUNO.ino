@@ -209,5 +209,10 @@ void skjerm(){
 
 void loop() {
   skjerm();
+<<<<<<< HEAD
 }*/
 //Fjern neopixel
+=======
+}
+//Fjern neopixel
+>>>>>>> 40870bb (Lagt til bompenger passeringer)
