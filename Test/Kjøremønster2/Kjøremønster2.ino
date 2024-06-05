@@ -32,10 +32,10 @@ unsigned long prevmillis = 0;
 int linelength = 400;
 bool doDrive = 0;
 
-int caseNum = 5;
-int destination = 4;
-int currentPosition = 0;
-int clockWise = 1;
+int caseNum = 1;
+int destination = 10;
+int currentPosition = 2;
+int clockWise = 0;
 
 
 //LadeStasjon
@@ -63,16 +63,20 @@ int outsidercounter = 0; // Setter man denne til 3 og caseNum til 5 så vil bile
 unsigned long outsidermillis;
 
 // Batterinivå/akselerometer
-unsigned long previousSpeedMillis = 0;
+unsigned long previousSpeedMillis, prevAveragesMillis = 0;
 int speedDistance, totalDistance = 0;
 int A = 1;
-int16_t firstSpeed, totalSpeed = 0;
+int16_t firstSpeed = 0;
 int readTime = 100;
-int speed = 100;
-int lastspeed = 0;
-int batterylevel;
+int16_t totalSpeed = 0;
+int16_t negativeTotalSpeed = 0;
+bool seventyMillis_start, stoppedTimer = false;
+int holdTimerValue, secondsAboveSeventy, aboveSeventyCounter, maxSpeed, distanceAverage, averageSpeed60Sec = 0;
+int akselerasjon;
 int prevSpeed;
-int accelerometer;
+int ecodrive = 0;
+unsigned long ecomillis;
+int batterylevel;
 #include "DriveLib.h"
 
 void driveOverLine(){//Funksjon til for å kjøre over linje
@@ -95,9 +99,6 @@ void driveOverLine(){//Funksjon til for å kjøre over linje
 void irDecodeGarasje(){ // Decoder ir signaler bilen får og setter verdier til hvor bilen skal kjøre i garasjen.
     if (IR.decode())
     {
-        display.gotoXY(0,0);
-        display.clear();
-        display.print(IR.decodedIRData.decodedRawData);
         if (IR.decodedIRData.decodedRawData == 2227349217) parkingAvailable = 1; // Ingen plass/Bensinbin
         if (IR.decodedIRData.decodedRawData == 510274632)   parkingAvailable = 2; // Første plass
         if (IR.decodedIRData.decodedRawData == 1277849113) parkingAvailable = 3; // Andre plass
@@ -392,9 +393,6 @@ void driving(){// Funksjon for kjøringen rundt i byen
                 else if(currentPosition == -1 && !clockWise){
                     currentPosition = 10;
                 }
-                if(millis()%5==0){
-                    display.clear();
-                }
                 if(aboveAll()){     // Treffer bilen et kryss vil den stoppe og kjøre over for så å oppdatere plasseringen.
                     prevcase = caseNum;
                     caseNum = 0;
@@ -444,14 +442,12 @@ void setup(){
     Serial.begin(115200);
     calibrateSensors();
     prevmillis, outsidermillis = 0;
+    display.setLayout8x2();
 }
 
 void loop(){
     driving();
     tollGate();
-    batterycheck();
-    if(millis()%50==0){
-        display.clear();
-        display.println(accelerometer);
-    }
+    speedometer();
+    advarsel();
 }

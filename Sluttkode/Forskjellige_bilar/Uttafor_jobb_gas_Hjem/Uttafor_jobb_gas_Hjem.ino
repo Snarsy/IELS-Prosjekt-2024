@@ -37,13 +37,11 @@ int destination = 10;
 int currentPosition = 1;
 int clockWise = 0;
 
-
 //LadeStasjon
-int chargePrevMillis;
-int howMuchCharge = 1;  //kun for å teste uten ir signal
+unsigned long chargePrevMillis;
+int howMuchCharge = -1;  //kun for å teste uten ir signal
 int chargecounter = 0;
 bool haveturned = 0;
-
 
 //Garasjen
 int parkingAvailable = 0;//Har nummeret 10 fram til bilen får ledig plass.
@@ -61,18 +59,23 @@ int housenumber = 2;
 //Outsider
 int outsidercounter = 3; // Setter man denne til 3 og caseNum til 5 så vil bilen være klar for å starte ved huset utenfor byen.
 unsigned long outsidermillis;
+int outsiderwait = 5000;
 
 // Batterinivå
-unsigned long previousSpeedMillis = 0;
+unsigned long previousSpeedMillis, prevAveragesMillis = 0;
 int speedDistance, totalDistance = 0;
 int A = 1;
-int16_t firstSpeed, totalSpeed = 0;
+int16_t firstSpeed = 0;
 int readTime = 100;
-int speed = 100;
-int lastspeed = 0;
-int batterylevel;
-int accelerometer;
+int16_t totalSpeed = 0;
+int16_t negativeTotalSpeed = 0;
+bool seventyMillis_start, stoppedTimer = false;
+int holdTimerValue, secondsAboveSeventy, aboveSeventyCounter, maxSpeed, distanceAverage, averageSpeed60Sec = 0;
+int akselerasjon;
 int prevSpeed;
+int ecodrive = 0;
+unsigned long ecomillis;
+int batterylevel;
 #include "DriveLib.h"
 
 
@@ -102,7 +105,7 @@ void irDecodeGarasje(){ // Decoder ir signaler bilen får og setter verdier til 
         display.gotoXY(0,0);
         display.clear();
         display.print(IR.decodedIRData.decodedRawData);
-        if (IR.decodedIRData.decodedRawData == 2227349217) parkingAvailable = 1; // Ingen plass/Bensinbin
+        if (IR.decodedIRData.decodedRawData == 135946 || IR.decodedIRData.decodedRawData == 271893) parkingAvailable = 1; // Ingen plass/Bensinbin
         if (IR.decodedIRData.decodedRawData == 510274632)   parkingAvailable = 2; // Første plass
         if (IR.decodedIRData.decodedRawData == 1277849113) parkingAvailable = 3; // Andre plass
         if (IR.decodedIRData.decodedRawData == 2163717077) parkingAvailable = 4; // Tredje plass
@@ -182,6 +185,8 @@ void garage(){// Funksjon for kjøringen i garasjen
                 currentPosition = 9;
                 haveturned = 0;
                 destination = 6;
+                outsidercounter = 0;
+                outsiderwait = 100000;
             }
             driveLinePID();
             break;
@@ -204,10 +209,11 @@ void garage(){// Funksjon for kjøringen i garasjen
             }
             break;
         case 3:
-            if((millis()-prevmillis)<(linelength+400)){
-                turndeg(-90);
+            if(!haveturned){
                 caseNumGarage = 1;
                 currentPosGarage = 8;
+                turndeg(-90);
+                haveturned = !haveturned;
             }
             break;
     }
@@ -227,7 +233,7 @@ void chargingStation(){// Funksjon for når bilen kjører inn til ladestasjonen
         doDrive = 1;
         haveturned = !haveturned;
     }
-    if (aboveAll() && chargecounter == 0){
+    if(aboveAll() && chargecounter == 0){
         motors.setSpeeds(0,0);
         doDrive = 0;
         if(clockWise) turndeg(90);
@@ -281,8 +287,8 @@ void chargingStation(){// Funksjon for når bilen kjører inn til ladestasjonen
         if(clockWise) turndeg(90);
         if(!clockWise) turndeg(-90);
         caseNum = 1;
-        destination = 4;
-        currentPosition = 5;
+        destination = 2;
+        currentPosition = 6;
         haveturned = 0;
    }
 }
@@ -346,7 +352,7 @@ void outsider(){
         destination = 10;
         turndeg(90);
     }
-    if(millis()-outsidermillis>5000 && outsidercounter == 3){
+    if(millis()-outsidermillis>outsiderwait && outsidercounter == 3){
         driveLinePID();
         if(aboveAll()){
             outsidercounter = 2; // Sier at bilen skal til garasjen fra hjemme.
@@ -436,16 +442,12 @@ void setup(){
     Serial.begin(115200);
     calibrateSensors();
     prevmillis, outsidermillis = 0;
+    display.setLayout21x8();
 }
 
 void loop(){
     driving();
     tollGate();
-    batterycheck();
-    if(millis()%50==0){
-        display.clear();
-        display.println(currentPosition);
-        display.print(batterylevel);
-        display.println(currentPosGarage);
-    }
+    speedometer();
+    advarsel();
 }
