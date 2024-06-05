@@ -12,6 +12,11 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 Adafruit_APDS9960 apds;
 
+//definerer for å bruke wire fra esp til arduino også
+#define I2C_SDA 33
+#define I2C_SCL 32
+
+TwoWire I2CAPDS = TwoWire(0);
 
 // MQTT-variabler
 
