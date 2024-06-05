@@ -1,3 +1,4 @@
+//Testing av APDS9960 med display. Fant ut at bibliotekene skaper en bug med hverandre, der apds9960 ikke fungerer lengre. 
 #include <Arduino.h>
 #include <SPI.h>
 #include <U8g2lib.h>
@@ -11,6 +12,9 @@ U8G2_SSD1306_128X64_NONAME_1_4W_SW_SPI display(U8G2_R0, /* clock=*/ 19, /* data=
 void setup() {
     Serial.begin(9600);
 
+    display.begin();
+    display.setFont(u8g_font_6x10);
+
     //Bevegelsesføler
     if(!apds.begin()){
       Serial.println("failed to initialize device! Please check your wiring.");
@@ -20,15 +24,13 @@ void setup() {
     apds.enableProximity(true);
     apds.enableGesture(true);
 
-    display.begin();
-    display.setFont(u8g_font_6x10);
-
 }
 
 //Batteri-variabler
 int batteryCharge = 50;
 int maxCharge = 50;
 int transactionCaseNumber = 0;
+
 
 void skjerm(){
   display.firstPage();
@@ -44,6 +46,7 @@ void batterygestures(){
     if(gesture == APDS9960_DOWN){
         batteryCharge -= 10;
         Serial.println("Down!");    
+        //skjerm();
 
     }
 
@@ -69,6 +72,12 @@ void batterygestures(){
 }
 
 void loop() {
-  batterygestures();
+  //batterygestures();
   //skjerm();
+  apds.begin();
+      uint8_t gesture = apds.readGesture();
+    if(gesture == APDS9960_DOWN) Serial.println("v");
+    if(gesture == APDS9960_UP) Serial.println("^");
+    if(gesture == APDS9960_LEFT) Serial.println("<");
+    if(gesture == APDS9960_RIGHT) Serial.println(">");
 }
