@@ -3,7 +3,7 @@ void calibrateSensors()
   display.clear();
   delay(1000);
   motors.setSpeeds(200,-200);
-  while(millis()<2750){
+  while(millis()<2100){
     lineSensors.calibrate();
   }
   motors.setSpeeds(0, 0);

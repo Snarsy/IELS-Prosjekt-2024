@@ -53,6 +53,7 @@ int currentPosGarage = 0;
 //Bompenger
 unsigned long BompreviousMillis = 0; // Store the last time the IR sensor was triggered
 const long Bominterval = 10000; // 10 seconds interval
+int tollgatepassings = 0;
 
 //Nabolag
 int housecounter = 4;
@@ -104,9 +105,7 @@ void irDecodeGarasje(){ // Decoder ir signaler bilen får og setter verdier til 
     }
     if (IR.decode())
     {
-        display.gotoXY(0,0);
-        display.clear();
-        display.print(IR.decodedIRData.decodedRawData);
+        display.println(IR.decodedIRData.decodedRawData);
         if (IR.decodedIRData.decodedRawData == 135946 || IR.decodedIRData.decodedRawData == 271893) parkingAvailable = 1; // Ingen plass/Bensinbin
         if (IR.decodedIRData.decodedRawData == 510274632)   parkingAvailable = 2; // Første plass
         if (IR.decodedIRData.decodedRawData == 1277849113) parkingAvailable = 3; // Andre plass
@@ -159,13 +158,13 @@ void garage(){// Funksjon for kjøringen i garasjen
             readSensors();
             if(aboveAll() && currentPosGarage<8){//Hvis den treffer et kryss og er på riktig plass i garasjen vil den snu 180 grader og bytte til case 2 hvor den står i ro.
                 if(parkingAvailable == 1){// Hvis den ikke får parkere ved at det ikke er plass vil den kjøre over linjen og bytte til case 3.
-                    prevmillis = millis();
                     caseNumGarage = 3;
                     prevcase = caseNum;
                     caseNum = 0;
                     haveturned = 0;
                     break;
                 }
+                    prevmillis = millis();
                 turndeg(180);
                 caseNumGarage = 2;
                 break;
@@ -205,7 +204,7 @@ void garage(){// Funksjon for kjøringen i garasjen
             driveLinePID();
             break;
         case 2:
-            if(millis()-prevmillis<3000 && currentPosGarage == (parkingAvailable+1)){
+            if(millis()-prevmillis<30000 && currentPosGarage == (parkingAvailable+1)){
                 motors.setSpeeds(0,0);
             }
             else{
@@ -235,7 +234,7 @@ void garage(){// Funksjon for kjøringen i garasjen
 
 void chargingStation(){// Funksjon for når bilen kjører inn til ladestasjonen
     if(buttonC.isPressed()){
-        howMuchCharge = 1;
+        howMuchCharge = 8;
     }
     followLinemaxSpeed = 200;
     if(doDrive == 1){
@@ -283,6 +282,7 @@ void chargingStation(){// Funksjon for når bilen kjører inn til ladestasjonen
     }
     if(howMuchCharge == 8){
         display.print("Lading: +80%");
+        speedDistance = 0;
     }
     if(howMuchCharge!=-1){
         howMuchCharge = -1;
@@ -310,7 +310,7 @@ void chargingStation(){// Funksjon for når bilen kjører inn til ladestasjonen
 
 
 void neighbourhood(){//Funksjon for kjøringen i nabolaget
-    followLinemaxSpeed = 200;
+    followLinemaxSpeed = 150;
     if(!haveturned){
         if(clockWise) turndeg(90);
         if(!clockWise) turndeg(-90);
@@ -346,7 +346,7 @@ void neighbourhood(){//Funksjon for kjøringen i nabolaget
         caseNum = 1;
         housecounter = 0;
         haveturned = 0;
-        rotationtime = rotationtime + 200;
+        rotationtime = rotationtime + 300;
     }
 }
 
@@ -388,11 +388,12 @@ void tollGate(){ //Tar imot bompenger, denne må være bare om det er dieselbil
         if (IR.decodedIRData.decodedRawData == 1217527807){
             if (BompreviousMillis == 0 || currentMillis - BompreviousMillis >= Bominterval) {
                 BompreviousMillis = currentMillis;
-
+                tollgatepassings += 1;
                 //Spiller G4
-                buzzer.playFrequency(392, 250, 15);
+                buzzer.playFrequency(392, 250, 5);
             }
         }
+        IR.resume();
     }
 }
 
@@ -467,4 +468,8 @@ void loop(){
     tollGate();
     speedometer();
     advarsel();
+    if(millis()%100==0 && ecodrive == 0){
+        display.clear();
+        display.print(batterylevel);
+    }
 }

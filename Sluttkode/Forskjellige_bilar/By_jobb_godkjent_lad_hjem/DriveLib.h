@@ -3,7 +3,7 @@ void calibrateSensors()
   display.clear();
   delay(1000);
   motors.setSpeeds(200,-200);
-  while(millis()<2750){
+  while(millis()<2650){
     lineSensors.calibrate();
   }
   motors.setSpeeds(0, 0);
@@ -120,7 +120,7 @@ void speedometer() // Måler fart hvert 10.dels sekund. Siden readtime = 100.
 
 void advarsel(){
     if(ecodrive == 1){
-            display.print("Ikke brems for ");
+            display.print("Ikke akselerer for ");
             display.gotoXY(0,1);
             display.print("agressivt, det er");
             display.gotoXY(0,2);
