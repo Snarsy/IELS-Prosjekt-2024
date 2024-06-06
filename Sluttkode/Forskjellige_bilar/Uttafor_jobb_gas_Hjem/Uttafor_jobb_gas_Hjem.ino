@@ -162,6 +162,7 @@ void garage(){// Funksjon for kjøringen i garasjen
                     caseNumGarage = 3;
                     prevcase = caseNum;
                     caseNum = 0;
+                    haveturned = 0;
                     break;
                 }
                 turndeg(180);
@@ -169,6 +170,18 @@ void garage(){// Funksjon for kjøringen i garasjen
                 break;
             }
             if(aboveLeft()){//Denne skjer førrst ved at uansett hvilket kryss det er så vil zumo'n kjøre over ved hjelp av case 0 i switch(caseNum).
+                if(parkingAvailable == 1 && currentPosGarage > 0 && currentPosGarage != 8){
+                    caseNumGarage = 3;
+                    prevcase = caseNum;
+                    caseNum = 0;
+                    haveturned = 0;
+                    break;
+                }
+                if(currentPosGarage == (parkingAvailable+1)){
+                    turndeg(180);
+                    caseNumGarage = 2;
+                    break;
+                }
                 currentPosGarage = currentPosGarage + 1;
                 prevcase = caseNum;
                 caseNum = 0;

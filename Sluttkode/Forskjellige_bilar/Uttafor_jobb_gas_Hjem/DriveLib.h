@@ -57,7 +57,15 @@ void driveLinePID()
 
     motors.setSpeeds(leftSpeed, rightSpeed);
 }
-
+bool aboveAll(){
+    readSensors();
+    if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4)){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
 bool aboveRight(){
     readSensors();
     if(aboveLine(3) && aboveLine(4)){
@@ -76,15 +84,7 @@ bool aboveLeft(){
         return false;
     }
 }
-bool aboveAll(){
-    readSensors();
-    if(aboveLine(0) && aboveLine(1) && aboveLine(2) && aboveLine(3) && aboveLine(4)){
-        return true;
-    }
-    else{
-        return false;
-    }
-}
+
 
 void speedometer() // Måler fart hvert 10.dels sekund. Siden readtime = 100.
 {
